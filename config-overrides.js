@@ -12,11 +12,12 @@ module.exports = override(
       "crypto": require.resolve("crypto-browserify"),
       "buffer": require.resolve("buffer/"),
       "stream": require.resolve("stream-browserify"),
-      "process": require.resolve("process/browser.js") // Ensure the extension is added here
+      "process": require.resolve("process/browser.js"),
+      "vm": require.resolve("vm-browserify")
     };
     config.plugins = (config.plugins || []).concat([
       new webpack.ProvidePlugin({
-        process: 'process/browser.js', // Ensure the extension is added here
+        process: 'process/browser.js',
         Buffer: ['buffer', 'Buffer']
       })
     ]);

@@ -1,0 +1,92 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('assets/images/church-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  opacity: 0.5;
+   top: 0%;
+   left: 0%;
+   width: 100%;
+   height: 100%;
+  background: linear-gradient(
+    45deg,
+    #009494,
+    #007171,
+    #b3a3cf,
+    #583b7c,
+    #009494,
+    #12ad58,
+    #0f6134
+  );
+  background-size: 400% 400%;
+  animation: gradientFlow 90s ease infinite, hueRotation 180s linear infinite;
+}
+
+#root {
+  z-index: 1;
+  padding: 0 2rem;
+}
+
+h1 {
+  color: white;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 2.5rem;
+  text-align: center;
+  text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.9);
+  margin: 0;
+  z-index: 1;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes hueRotation {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+}
+
+@keyframes hueRotation {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+}

@@ -60,7 +60,7 @@ export function App() {
           <Playground />
         </section>
 
-        <section className="section section-alt" id="integrate">
+        <section className="section section-alt section-centered" id="integrate">
           <div className="section-head">
             <h2>Three ways in</h2>
             <p>

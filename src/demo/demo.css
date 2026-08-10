@@ -251,6 +251,22 @@ code {
   font-size: 1.02rem;
 }
 
+/*
+ * Opt-in centering for a section that reads as one block rather than a
+ * left-aligned column. `.section-alt > *` already applies `margin-inline: auto`,
+ * which centers the narrow .section-head box on its own -- but the text inside
+ * stays left-aligned, so the heading floats off-axis from the full-width
+ * content under it. Centering the text is what actually makes the group line up.
+ */
+.section-centered .section-head {
+  text-align: center;
+}
+
+/* Same specificity clash as .category-grid -- .code sets `margin: 0`. */
+.section-centered .code {
+  margin-inline: auto;
+}
+
 /* ---------- playground ---------- */
 
 .playground {
@@ -670,16 +686,27 @@ code {
 
 /* ---------- categories ---------- */
 
+/*
+ * Flex rather than grid: with `repeat(auto-fit, minmax(14rem, 1fr))` the nine
+ * chips fill every track, so the last row's single chip stretched across the
+ * full width instead of sitting under the others. A fixed basis that doesn't
+ * grow lets `justify-content: center` center each row, orphans included.
+ */
 .category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.8rem;
-  margin: 0 0 2rem;
+  /* `auto`, not 0: `.section-alt > *` has the same specificity as this rule
+     (a `>` combinator and `*` both add none), so a plain `margin: 0` here wins
+     on source order and knocks out the centering it applies. */
+  margin: 0 auto 2rem;
   padding: 0;
   list-style: none;
 }
 
 .category-chip {
+  flex: 0 1 15rem;
   padding: 0.9rem 1rem;
   border: 1px solid hsl(var(--hue) 40% 88%);
   border-left: 3px solid hsl(var(--hue) 58% 52%);
@@ -755,6 +782,16 @@ code {
 }
 
 /* ---------- responsive ---------- */
+
+/*
+ * Below this only one chip fits per row anyway, and a non-growing 15rem basis
+ * would leave it floating in a wider container. Let them fill instead.
+ */
+@media (max-width: 34rem) {
+  .category-chip {
+    flex: 1 1 100%;
+  }
+}
 
 @media (max-width: 60rem) {
   .playground {

@@ -35,100 +35,105 @@ export function Playground() {
 
   return (
     <div className="playground">
-      <div className="playground-controls">
-        <h3 className="controls-title">Configure</h3>
+      {/* The sticky panel needs a non-sticky grid item to sit inside:
+          a sticky grid item is constrained by the whole grid, so it would
+          slide down over the code block in the second row. */}
+      <div className="playground-sidebar">
+        <div className="playground-controls">
+          <h3 className="controls-title">Configure</h3>
 
-        <Control label="Theme">
-          <Segmented
-            value={config.theme}
-            onChange={set('theme')}
-            options={[
-              { value: 'light', label: 'Light' },
-              { value: 'dark', label: 'Dark' },
-              { value: 'auto', label: 'Auto' },
-            ]}
-          />
-        </Control>
-
-        <Control label="Accent">
-          <div className="swatches">
-            {ACCENTS.map((accent) => (
-              <button
-                key={accent.value}
-                type="button"
-                className={`swatch ${config.accent === accent.value ? 'is-active' : ''}`}
-                style={{ '--swatch': accent.value }}
-                onClick={() => set('accent')(accent.value)}
-                title={accent.name}
-              >
-                <span className="sr-only">{accent.name}</span>
-              </button>
-            ))}
-          </div>
-        </Control>
-
-        <Control label="Density">
-          <Segmented
-            value={config.density}
-            onChange={set('density')}
-            options={[
-              { value: 'comfortable', label: 'Comfortable' },
-              { value: 'compact', label: 'Compact' },
-            ]}
-          />
-        </Control>
-
-        <Control label="Corners">
-          <Segmented
-            value={config.radius}
-            onChange={set('radius')}
-            options={[
-              { value: 'sm', label: 'Sharp' },
-              { value: 'md', label: 'Medium' },
-              { value: 'xl', label: 'Round' },
-            ]}
-          />
-        </Control>
-
-        <Control label="Show">
-          <div className="toggles">
-            <Toggle
-              label="Header"
-              checked={config.showHeader}
-              onChange={set('showHeader')}
+          <Control label="Theme">
+            <Segmented
+              value={config.theme}
+              onChange={set('theme')}
+              options={[
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' },
+                { value: 'auto', label: 'Auto' },
+              ]}
             />
-            <Toggle
-              label="Breakdown"
-              checked={config.showStats}
-              onChange={set('showStats')}
-            />
-            <Toggle
-              label="Timestamps"
-              checked={config.showTimestamps}
-              onChange={set('showTimestamps')}
-            />
-          </div>
-        </Control>
+          </Control>
 
-        <Control label="Try an example">
-          <div className="samples">
-            {SAMPLE_REQUESTS.map((sample) => (
-              <button
-                key={sample.label}
-                type="button"
-                className="sample"
-                onClick={() => copyToField(sample.text)}
-                title={sample.text}
-              >
-                {sample.label}
-              </button>
-            ))}
-          </div>
-          <p className="control-hint">
-            Fills the field below. The demo runs the offline provider, so
-            nothing you type leaves this page.
-          </p>
-        </Control>
+          <Control label="Accent">
+            <div className="swatches">
+              {ACCENTS.map((accent) => (
+                <button
+                  key={accent.value}
+                  type="button"
+                  className={`swatch ${config.accent === accent.value ? 'is-active' : ''}`}
+                  style={{ '--swatch': accent.value }}
+                  onClick={() => set('accent')(accent.value)}
+                  title={accent.name}
+                >
+                  <span className="sr-only">{accent.name}</span>
+                </button>
+              ))}
+            </div>
+          </Control>
+
+          <Control label="Density">
+            <Segmented
+              value={config.density}
+              onChange={set('density')}
+              options={[
+                { value: 'comfortable', label: 'Comfortable' },
+                { value: 'compact', label: 'Compact' },
+              ]}
+            />
+          </Control>
+
+          <Control label="Corners">
+            <Segmented
+              value={config.radius}
+              onChange={set('radius')}
+              options={[
+                { value: 'sm', label: 'Sharp' },
+                { value: 'md', label: 'Medium' },
+                { value: 'xl', label: 'Round' },
+              ]}
+            />
+          </Control>
+
+          <Control label="Show">
+            <div className="toggles">
+              <Toggle
+                label="Header"
+                checked={config.showHeader}
+                onChange={set('showHeader')}
+              />
+              <Toggle
+                label="Breakdown"
+                checked={config.showStats}
+                onChange={set('showStats')}
+              />
+              <Toggle
+                label="Timestamps"
+                checked={config.showTimestamps}
+                onChange={set('showTimestamps')}
+              />
+            </div>
+          </Control>
+
+          <Control label="Try an example">
+            <div className="samples">
+              {SAMPLE_REQUESTS.map((sample) => (
+                <button
+                  key={sample.label}
+                  type="button"
+                  className="sample"
+                  onClick={() => copyToField(sample.text)}
+                  title={sample.text}
+                >
+                  {sample.label}
+                </button>
+              ))}
+            </div>
+            <p className="control-hint">
+              Fills the field below. The demo runs the offline provider, so
+              nothing you type leaves this page.
+            </p>
+          </Control>
+        </div>
       </div>
 
       <div

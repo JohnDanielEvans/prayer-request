@@ -260,9 +260,23 @@ code {
   align-items: start;
 }
 
+/*
+ * The sidebar is the grid item; the panel inside it is what sticks. A sticky
+ * grid item gets constrained by the grid container rather than by its own row,
+ * so it would travel down across the code block in row 2.
+ */
+.playground-sidebar {
+  height: 100%;
+}
+
 .playground-controls {
   position: sticky;
   top: 1.5rem;
+  /* Taller than the viewport, sticky stops making sense and the panel's own
+     bottom becomes unreachable. Cap it and let the panel scroll itself. */
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1.35rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -749,6 +763,8 @@ code {
 
   .playground-controls {
     position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 

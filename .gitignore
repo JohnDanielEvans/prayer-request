@@ -1,4 +1,11 @@
 node_modules/
-build/
+dist/
+dist-demo/
+dist-embed/
 .env
-package-lock.json
+.env.local
+*.log
+.DS_Store
+
+# Claude Code workspace config — local tooling, not part of the project
+.claude/

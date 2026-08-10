@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Embed test — hostile host page</title>
+
+    <style>
+      /*
+       * Deliberately awful host CSS. This is not a strawman -- every rule here
+       * is something real WordPress themes, old Bootstrap builds, and
+       * "opinionated" resets actually do. The widget renders inside a shadow
+       * root, so none of it reaches in.
+       */
+      * {
+        box-sizing: content-box !important;
+        font-family: 'Comic Sans MS', cursive;
+      }
+      button {
+        display: block;
+        width: 100%;
+        padding: 30px;
+        border: 4px dashed magenta;
+        background: yellow;
+        color: red;
+        font-size: 22px;
+        text-transform: uppercase;
+      }
+      textarea {
+        min-height: 400px;
+        border: 6px double lime;
+        background: #300;
+        color: lime;
+      }
+      h2 {
+        font-size: 60px;
+        color: hotpink;
+        text-shadow: 4px 4px 0 cyan;
+      }
+      ul,
+      li {
+        list-style: square inside;
+        padding-left: 40px;
+      }
+      p {
+        margin: 40px 0;
+        line-height: 4;
+      }
+
+      body {
+        max-width: 60rem;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #fafafa;
+      }
+      .panel {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        background: #fff;
+      }
+      .panel > h3 {
+        margin-top: 0;
+        font-family: system-ui, sans-serif;
+      }
+      .note {
+        margin: 0 0 1rem;
+        color: #666;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3 style="font-family: system-ui, sans-serif">
+      Embed test: three mounts on one page
+    </h3>
+
+    <div class="panel">
+      <h3>1. Declarative — no JavaScript of your own</h3>
+      <p class="note">
+        The page just has a <code>&lt;div data-prayer-widget&gt;</code>. The
+        script finds it on load and mounts into a shadow root.
+      </p>
+      <div
+        data-prayer-widget
+        data-title="How can we pray for you?"
+        data-accent="#0f766e"
+        data-persist="false"
+      ></div>
+    </div>
+
+    <div class="panel">
+      <h3>2. Imperative — dark theme, custom categories, compact</h3>
+      <p class="note">
+        Mounted via <code>PrayerWidget.mount()</code> with options passed as an
+        object.
+      </p>
+      <div id="dark-mount"></div>
+    </div>
+
+    <div class="panel">
+      <h3>3. Shadow DOM off — inherits the host's terrible CSS</h3>
+      <p class="note">
+        Same widget with <code>shadow: false</code>. Scoped class names still
+        prevent the widget from leaking out, but the host's
+        <code>button</code> and <code>textarea</code> rules now leak
+        <em>in</em>. This is the failure mode shadow DOM exists to prevent.
+      </p>
+      <div id="leaky-mount"></div>
+    </div>
+
+    <script src="../dist-embed/prayer-widget.js"></script>
+    <script>
+      PrayerWidget.mount('#dark-mount', {
+        theme: 'dark',
+        accent: '#7c3aed',
+        density: 'compact',
+        persist: false,
+        title: 'Submit a request',
+        subtitle: 'Sorted for the prayer team.',
+        categories: ['Health', 'Family', 'Missions', 'Gratitude'],
+      });
+
+      PrayerWidget.mount('#leaky-mount', {
+        shadow: false,
+        persist: false,
+        showHeader: false,
+      });
+    </script>
+  </body>
+</html>

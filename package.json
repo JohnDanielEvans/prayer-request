@@ -1,33 +1,68 @@
 {
-  "name": "ai-prayer-categorizer",
-  "version": "1.0.0",
-  "description": "A simple AI-powered prayer request categorizer",
-  "main": "src/index.js",
+  "name": "prayer-request-widget",
+  "version": "2.0.0",
+  "description": "An embeddable, AI-powered prayer request categorizer. Drop it into any React app as a component, or into any website with a single script tag.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/prayer-request-widget.cjs",
+  "module": "./dist/prayer-request-widget.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/prayer-request-widget.js",
+      "require": "./dist/prayer-request-widget.cjs"
+    },
+    "./styles.css": "./dist/prayer-request-widget.css"
+  },
+  "files": [
+    "dist",
+    "server",
+    "README.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build"
+    "start": "vite",
+    "dev": "vite",
+    "preview": "vite preview",
+    "build": "npm run build:demo && npm run build:lib && npm run build:embed",
+    "build:demo": "BUILD_TARGET=demo vite build",
+    "build:lib": "BUILD_TARGET=lib vite build",
+    "build:embed": "BUILD_TARGET=embed vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "proxy": "node server/node-proxy.mjs"
   },
-  "dependencies": {
-    "axios": "^1.8.1",
-    "axios-retry": "^4.5.0",
-    "buffer": "^6.0.3",
-    "crypto-browserify": "^3.12.1",
-    "customize-cra": "^1.0.0",
-    "dotenv": "^16.4.7",
-    "openai": "^4.85.4",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "postcss": "^8.5.3",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "process": "^0.11.10",
-    "react": "^18.0.0",
-    "react-app-rewired": "^2.1.8",
-    "react-dom": "^18.0.0",
-    "react-scripts": "latest",
-    "stream-browserify": "^3.0.0",
-    "vm-browserify": "^1.1.2",
-    "webpack": "^5.98.0"
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "react",
+    "widget",
+    "embeddable",
+    "openai",
+    "prayer",
+    "classification",
+    "portfolio"
+  ],
   "browserslist": {
     "production": [
       ">0.2%",

@@ -239,7 +239,7 @@ export function App() {
           </div>
         </section>
 
-        <section className="section section-alt">
+        <section className="section section-alt section-centered">
           <div className="section-head">
             <h2>Run it</h2>
           </div>

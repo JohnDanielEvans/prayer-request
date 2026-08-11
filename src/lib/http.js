@@ -1,8 +1,8 @@
 /** Error carrying enough context for the UI to say something useful. */
-export class CategorizeError extends Error {
+export class ClassificationError extends Error {
   constructor(message, { status, cause, retryable = false } = {}) {
     super(message);
-    this.name = 'CategorizeError';
+    this.name = 'ClassificationError';
     this.status = status;
     this.retryable = retryable;
     if (cause) this.cause = cause;
@@ -57,10 +57,10 @@ export async function postJson(url, body, { headers = {}, signal, retries = 3, b
         attempt += 1;
         continue;
       }
-      throw new CategorizeError(
+      throw new ClassificationError(
         timeoutController.signal.aborted
-          ? 'The categorizer timed out. Please try again.'
-          : 'Could not reach the categorizer. Check your connection.',
+          ? 'The classifier timed out. Please try again.'
+          : 'Could not reach the classifier. Check your connection.',
         { cause: error, retryable: true }
       );
     } finally {
@@ -79,7 +79,7 @@ export async function postJson(url, body, { headers = {}, signal, retries = 3, b
       continue;
     }
 
-    throw new CategorizeError(messageForStatus(response.status, await safeText(response)), {
+    throw new ClassificationError(messageForStatus(response.status, await safeText(response)), {
       status: response.status,
       retryable: RETRYABLE_STATUSES.has(response.status),
     });
@@ -93,31 +93,51 @@ function backoffDelay(base, attempt) {
 }
 
 function messageForStatus(status, detail) {
-  const suffix = detail ? ` (${detail.slice(0, 140)})` : '';
+  const suffix = detail ? ` (${detail})` : '';
   if (status === 401 || status === 403) {
-    return `The categorizer rejected the request -- check the API credentials.${suffix}`;
+    return `The classifier rejected the request -- check the API credentials.${suffix}`;
   }
   if (status === 429) {
-    return `Rate limited by the categorizer. Wait a moment and try again.${suffix}`;
+    return `Rate limited by the classifier. Wait a moment and try again.${suffix}`;
   }
   if (status >= 500) {
-    return `The categorizer is having trouble right now.${suffix}`;
+    return `The classifier is having trouble right now.${suffix}`;
   }
-  return `Categorization failed with status ${status}.${suffix}`;
+  return `Classification failed with status ${status}.${suffix}`;
 }
 
+/**
+ * A short, human-usable detail from an error response -- or nothing.
+ *
+ * Endpoints that fail often answer with an HTML error page, and pasting that
+ * into the widget's error message put a doctype and a stylesheet in front of
+ * the user. Only structured messages are surfaced; anything that looks like
+ * markup is dropped.
+ */
 async function safeText(response) {
   try {
-    const text = await response.text();
+    const text = (await response.text()).trim();
+    if (!text) return '';
+
     try {
       const json = JSON.parse(text);
-      return json?.error?.message ?? json?.message ?? text;
+      const message = json?.error?.message ?? json?.message;
+      return typeof message === 'string' ? clip(message) : '';
     } catch {
-      return text;
+      if (text.startsWith('<') || /<\/?[a-z][\s\S]*>/i.test(text.slice(0, 200))) {
+        return '';
+      }
+      return clip(text);
     }
   } catch {
     return '';
   }
+}
+
+/** One line, bounded length -- error text belongs in a sentence, not a wall. */
+function clip(value, max = 120) {
+  const flat = value.replace(/\s+/g, ' ').trim();
+  return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat;
 }
 
 /** AbortSignal.any, with a fallback for browsers that predate it. */

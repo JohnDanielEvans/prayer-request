@@ -1,25 +1,28 @@
-import { CategorizeError, postJson } from '../http.js';
-import { matchCategory, normalizeConfidence } from '../normalize.js';
+import { ClassificationError, postJson } from '../http.js';
+import { toClassification } from './shared.js';
 
 /**
  * The provider you should ship.
  *
  * The widget posts to an endpoint you own; your server holds the API key and
  * talks to the model. Nothing secret reaches the browser, you can rate-limit
- * and log on your terms, and you can swap models without redeploying the
- * front end. See server/ for a zero-dependency reference implementation.
+ * and log on your terms, and you can swap models without redeploying the front
+ * end. See server/ for two working implementations.
  *
  * Request:  { text, categories: [{ id, label, description }] }
- * Response: { category, confidence?, summary? }
+ * Response: { category, priority?, tags?, confidence?, summary? }
+ *
+ * The response is validated client-side as well as server-side -- your endpoint
+ * is trusted infrastructure, but the model behind it still isn't.
  */
 export function createEndpointProvider({ url, headers, credentials, retries } = {}) {
   if (!url) {
-    throw new CategorizeError(
+    throw new ClassificationError(
       'The "endpoint" provider needs an `endpoint` URL prop.'
     );
   }
 
-  return async function categorize({ text, categories, signal }) {
+  return async function classify({ text, categories, signal }) {
     const payload = await postJson(
       url,
       {
@@ -33,16 +36,11 @@ export function createEndpointProvider({ url, headers, credentials, retries } = 
       { headers, credentials, signal, retries }
     );
 
-    const category = matchCategory(
-      payload?.category ?? payload?.categoryId ?? payload?.label,
-      categories
-    );
-
-    return {
-      categoryId: category.id,
-      confidence: normalizeConfidence(payload?.confidence),
-      summary: typeof payload?.summary === 'string' ? payload.summary : null,
+    return toClassification({
+      raw: payload,
+      text,
+      categories,
       provider: 'endpoint',
-    };
+    });
   };
 }

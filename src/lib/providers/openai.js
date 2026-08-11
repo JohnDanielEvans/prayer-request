@@ -1,5 +1,6 @@
-import { CategorizeError, postJson } from '../http.js';
-import { matchCategory, normalizeConfidence, parseJsonLoose } from '../normalize.js';
+import { ClassificationError, postJson } from '../http.js';
+import { parseJsonLoose } from '../normalize.js';
+import { buildSystemPrompt, toClassification } from './shared.js';
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -12,7 +13,7 @@ const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
  */
 export function createOpenAIProvider({ apiKey, model = 'gpt-4o-mini', retries } = {}) {
   if (!apiKey) {
-    throw new CategorizeError(
+    throw new ClassificationError(
       'The "openai" provider needs an `apiKey`. Set VITE_OPENAI_API_KEY in .env, or switch to provider="endpoint".'
     );
   }
@@ -20,17 +21,17 @@ export function createOpenAIProvider({ apiKey, model = 'gpt-4o-mini', retries } 
   if (typeof window !== 'undefined' && !hasWarned) {
     hasWarned = true;
     console.warn(
-      '[prayer-request-widget] provider="openai" exposes your API key to every ' +
-        'visitor. Use provider="endpoint" with the proxy in server/ before deploying.'
+      '[smart-intake] provider="openai" exposes your API key to every visitor. ' +
+        'Use provider="endpoint" with the proxy in server/ before deploying.'
     );
   }
 
-  return async function categorize({ text, categories, signal }) {
+  return async function classify({ text, categories, signal }) {
     const payload = await postJson(
       OPENAI_URL,
       {
         model,
-        // Deterministic: the same request should not land in two buckets on
+        // Deterministic: the same message should not land in two categories on
         // two submissions.
         temperature: 0,
         response_format: { type: 'json_object' },
@@ -43,40 +44,18 @@ export function createOpenAIProvider({ apiKey, model = 'gpt-4o-mini', retries } 
     );
 
     const content = payload?.choices?.[0]?.message?.content;
-    const parsed = parseJsonLoose(content) ?? {};
-    const category = matchCategory(parsed.category ?? content, categories);
 
-    return {
-      categoryId: category.id,
-      confidence: normalizeConfidence(parsed.confidence),
-      summary: typeof parsed.summary === 'string' ? parsed.summary : null,
+    // Even with response_format json_object, the parse is defensive: the field
+    // can be missing on a refusal or a truncated response.
+    return toClassification({
+      raw: parseJsonLoose(content) ?? { category: content },
+      text,
+      categories,
       provider: 'openai',
-    };
+    });
   };
 }
 
 let hasWarned = false;
 
-/** Shared with server/ so both paths classify identically. */
-export function buildSystemPrompt(categories) {
-  const list = categories
-    .map((c) => `- ${c.id}: ${c.label}${c.description ? ` -- ${c.description}` : ''}`)
-    .join('\n');
-
-  return [
-    'You sort prayer requests submitted to a church into one category.',
-    'These are real people writing about hard things. Be accurate and never judgmental.',
-    '',
-    'Categories:',
-    list,
-    '',
-    'Reply with JSON only, in this exact shape:',
-    '{"category": "<category id from the list>", "confidence": <0 to 1>, "summary": "<neutral restatement, at most 12 words>"}',
-    '',
-    'Rules:',
-    '- "category" must be one of the ids above, verbatim.',
-    '- Pick the single dominant need when a request touches several categories.',
-    '- Use "other" when nothing fits, rather than forcing a match.',
-    '- The summary restates the request. Never add advice, judgment, or scripture.',
-  ].join('\n');
-}
+export { buildSystemPrompt };

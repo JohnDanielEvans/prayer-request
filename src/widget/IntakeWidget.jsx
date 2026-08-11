@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react';
-import { RequestForm } from './RequestForm.jsx';
-import { RequestList } from './RequestList.jsx';
+import { IntakeForm } from './IntakeForm.jsx';
+import { ResultList } from './ResultList.jsx';
 import { StatsBar } from './StatsBar.jsx';
 import { LockIcon, TrashIcon } from './Icons.jsx';
-import { usePrayerRequests } from '../lib/usePrayerRequests.js';
+import { useIntake } from '../lib/useIntake.js';
 import { buildThemeVars } from '../lib/theme.js';
+import { STORAGE_KEY } from '../lib/product.js';
 import styles from './widget.module.css';
 
 /**
  * The whole widget. Self-contained, theme-aware, and safe to drop into a page
  * you don't control: styles are CSS-module scoped, colors come from custom
  * properties set on this element, and nothing touches document or body.
+ *
+ * Every preset in the demo is this component with different props. There is no
+ * per-use-case branch anywhere below this line.
  */
-export function PrayerRequestWidget({
-  // --- categorization ---
+export function IntakeWidget({
+  // --- classification ---
   provider = 'mock',
   endpoint,
   apiKey,
@@ -24,13 +28,13 @@ export function PrayerRequestWidget({
   categories,
 
   // --- copy ---
-  title = 'How can we pray for you?',
-  subtitle = 'Share a request and it will be sorted so our prayer team can follow up.',
-  placeholder = 'Write your prayer request...',
-  submitLabel = 'Submit request',
+  title = 'How can we help?',
+  subtitle = 'Tell us what you need and it will reach the right team.',
+  placeholder = 'Describe what you need...',
+  submitLabel = 'Send request',
   helperText = 'Press Cmd/Ctrl + Enter to submit.',
-  emptyText = 'Your requests will appear here.',
-  privacyNote = 'Requests stay in this browser.',
+  emptyText = 'Classified submissions will appear here.',
+  privacyNote = 'Submissions stay in this browser.',
 
   // --- appearance ---
   theme = 'auto',
@@ -44,30 +48,22 @@ export function PrayerRequestWidget({
   showTimestamps = true,
   showPrivacyNote = true,
   showClear = true,
+  showJson = true,
 
   // --- behavior ---
   maxLength = 600,
   persist = true,
-  storageKey,
+  storageKey = STORAGE_KEY,
   disabled = false,
 
   // --- escape hatches ---
   onSubmit,
-  onResult,
+  onClassified,
   onError,
   className = '',
   style,
 }) {
-  const {
-    requests,
-    stats,
-    error,
-    isBusy,
-    submit,
-    retry,
-    remove,
-    clear,
-  } = usePrayerRequests({
+  const { submissions, stats, error, isBusy, submit, retry, remove, clear } = useIntake({
     provider,
     endpoint,
     apiKey,
@@ -78,7 +74,7 @@ export function PrayerRequestWidget({
     categories,
     persist,
     storageKey,
-    onResult,
+    onClassified,
     onError,
   });
 
@@ -109,7 +105,7 @@ export function PrayerRequestWidget({
         </header>
       )}
 
-      <RequestForm
+      <IntakeForm
         onSubmit={handleSubmit}
         placeholder={placeholder}
         submitLabel={submitLabel}
@@ -126,20 +122,20 @@ export function PrayerRequestWidget({
         </p>
       )}
 
-      {/* Errors are announced, not just colored -- the form may be off-screen
-          by the time a slow request fails. */}
+      {/* Announced, not just colored -- the form may be off-screen by the time
+          a slow request resolves. */}
       <div className={styles.srOnly} role="status" aria-live="polite">
-        {isBusy ? 'Categorizing your request.' : ''}
+        {isBusy ? 'Classifying your message.' : ''}
         {error ? `Error: ${error}` : ''}
       </div>
 
       {showStats && <StatsBar stats={stats} />}
 
       <div className={styles.listHeader}>
-        {requests.length > 0 && (
+        {submissions.length > 0 && (
           <>
             <span className={styles.listTitle}>
-              {requests.length} {requests.length === 1 ? 'request' : 'requests'}
+              {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
             </span>
             {showClear && (
               <button type="button" className={styles.textButton} onClick={clear}>
@@ -151,11 +147,12 @@ export function PrayerRequestWidget({
         )}
       </div>
 
-      <RequestList
-        requests={requests}
+      <ResultList
+        submissions={submissions}
         onRetry={retry}
         onRemove={remove}
         showTimestamps={showTimestamps}
+        showJson={showJson}
         emptyText={emptyText}
       />
     </section>
@@ -163,9 +160,9 @@ export function PrayerRequestWidget({
 }
 
 /**
- * `auto` follows the host's color scheme. We resolve it in JS rather than with
- * a media query so an explicit `theme` prop always wins -- a host that renders
- * this inside a dark panel on a light page needs to be able to say so.
+ * `auto` follows the host's color scheme. Resolved in JS rather than with a
+ * media query so an explicit `theme` prop always wins -- a host rendering this
+ * inside a dark panel on a light page needs to be able to say so.
  */
 function useResolvedTheme(theme) {
   const [systemTheme, setSystemTheme] = useState('light');
@@ -186,4 +183,4 @@ function useResolvedTheme(theme) {
   return theme === 'auto' ? systemTheme : theme;
 }
 
-export default PrayerRequestWidget;
+export default IntakeWidget;

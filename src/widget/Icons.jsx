@@ -61,6 +61,15 @@ export function AlertIcon(props) {
   );
 }
 
+export function CodeIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m9 8-4.5 4L9 16" />
+      <path d="m15 8 4.5 4L15 16" />
+    </svg>
+  );
+}
+
 export function LockIcon(props) {
   return (
     <svg {...base} {...props}>

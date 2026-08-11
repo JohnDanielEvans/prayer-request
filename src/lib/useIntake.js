@@ -1,17 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { resolveCategories, FALLBACK_CATEGORY_ID } from './categories.js';
+import { fallbackCategory, resolveCategories } from './categories.js';
+import { PRIORITIES } from './classification.js';
 import { resolveProvider } from './providers/index.js';
-import { clearRequests, loadRequests, saveRequests } from './storage.js';
+import { STORAGE_KEY } from './product.js';
+import { clearSubmissions, loadSubmissions, saveSubmissions } from './storage.js';
 
 let counter = 0;
-const nextId = () =>
-  `prw-${Date.now().toString(36)}-${(counter += 1).toString(36)}`;
+const nextId = () => `si-${Date.now().toString(36)}-${(counter += 1).toString(36)}`;
 
 /**
- * All widget state in one hook, exported so you can build your own UI on top of
- * this project's logic and keep the categorization, retry, and persistence.
+ * The headless API. All widget state lives here, exported so you can build your
+ * own UI on top of this project's logic and keep the classification, retry,
+ * abort, and persistence behavior.
+ *
+ * An IntakeSubmission looks like:
+ *   { id, text, status, createdAt,
+ *     category, priority, tags, confidence, summary, source, error }
+ *
+ * `status` is 'pending' | 'done' | 'error'; the classification fields are null
+ * until it resolves.
  */
-export function usePrayerRequests({
+export function useIntake({
   provider = 'mock',
   endpoint,
   apiKey,
@@ -21,8 +30,8 @@ export function usePrayerRequests({
   retries,
   categories: categoriesProp,
   persist = true,
-  storageKey = 'prayer-request-widget:v2',
-  onResult,
+  storageKey = STORAGE_KEY,
+  onClassified,
   onError,
 } = {}) {
   const categories = useMemo(
@@ -31,7 +40,7 @@ export function usePrayerRequests({
   );
 
   const activeStorageKey = persist ? storageKey : null;
-  const [requests, setRequests] = useState(() => loadRequests(activeStorageKey));
+  const [submissions, setSubmissions] = useState(() => loadSubmissions(activeStorageKey));
   const [error, setError] = useState(null);
 
   // In-flight requests, so unmounting or clearing cancels the network calls
@@ -40,12 +49,12 @@ export function usePrayerRequests({
 
   // Callbacks live in a ref so an inline arrow prop doesn't re-create `submit`
   // on every render of the host.
-  const callbacks = useRef({ onResult, onError });
+  const callbacks = useRef({ onClassified, onError });
   useEffect(() => {
-    callbacks.current = { onResult, onError };
+    callbacks.current = { onClassified, onError };
   });
 
-  const categorize = useMemo(
+  const classify = useMemo(
     () =>
       resolveProvider(provider, {
         endpoint,
@@ -59,8 +68,8 @@ export function usePrayerRequests({
   );
 
   useEffect(() => {
-    saveRequests(activeStorageKey, requests);
-  }, [activeStorageKey, requests]);
+    saveSubmissions(activeStorageKey, submissions);
+  }, [activeStorageKey, submissions]);
 
   useEffect(
     () => () => {
@@ -71,7 +80,7 @@ export function usePrayerRequests({
   );
 
   const patch = useCallback((id, changes) => {
-    setRequests((current) =>
+    setSubmissions((current) =>
       current.map((item) => (item.id === id ? { ...item, ...changes } : item))
     );
   }, []);
@@ -82,19 +91,17 @@ export function usePrayerRequests({
       controllers.current.set(id, controller);
 
       try {
-        const result = await categorize({
-          text,
-          categories,
-          signal: controller.signal,
-        });
+        const result = await classify({ text, categories, signal: controller.signal });
 
         const category =
           categories.find((c) => c.id === result?.categoryId) ??
-          categories.find((c) => c.id === FALLBACK_CATEGORY_ID);
+          fallbackCategory(categories);
 
         const done = {
           status: 'done',
           category,
+          priority: result?.priority ?? 'normal',
+          tags: result?.tags ?? [],
           confidence: result?.confidence ?? null,
           summary: result?.summary ?? null,
           source: result?.provider ?? null,
@@ -103,12 +110,11 @@ export function usePrayerRequests({
 
         patch(id, done);
         setError(null);
-        callbacks.current.onResult?.({ id, text, ...done });
+        callbacks.current.onClassified?.({ id, text, ...done });
       } catch (err) {
         if (err?.name === 'AbortError') return;
 
-        const message =
-          err?.message ?? 'Something went wrong categorizing that request.';
+        const message = err?.message ?? 'Something went wrong classifying that message.';
         patch(id, { status: 'error', error: message });
         setError(message);
         callbacks.current.onError?.(err);
@@ -116,7 +122,7 @@ export function usePrayerRequests({
         controllers.current.delete(id);
       }
     },
-    [categorize, categories, patch]
+    [classify, categories, patch]
   );
 
   const submit = useCallback(
@@ -125,15 +131,17 @@ export function usePrayerRequests({
       if (!trimmed) return null;
 
       const id = nextId();
-      // Optimistic: the request is on screen before the model answers, so the
-      // person sees their words land immediately.
-      setRequests((current) => [
+      // Optimistic: the submission is on screen before the classifier answers,
+      // so the person sees their words land immediately.
+      setSubmissions((current) => [
         ...current,
         {
           id,
           text: trimmed,
           status: 'pending',
           category: null,
+          priority: null,
+          tags: [],
           confidence: null,
           summary: null,
           error: null,
@@ -149,54 +157,65 @@ export function usePrayerRequests({
 
   const retry = useCallback(
     (id) => {
-      const target = requests.find((item) => item.id === id);
+      const target = submissions.find((item) => item.id === id);
       if (!target) return;
       patch(id, { status: 'pending', error: null });
       run(id, target.text);
     },
-    [requests, patch, run]
+    [submissions, patch, run]
   );
 
   const remove = useCallback((id) => {
     controllers.current.get(id)?.abort();
     controllers.current.delete(id);
-    setRequests((current) => current.filter((item) => item.id !== id));
+    setSubmissions((current) => current.filter((item) => item.id !== id));
   }, []);
 
   const clear = useCallback(() => {
     for (const controller of controllers.current.values()) controller.abort();
     controllers.current.clear();
-    setRequests([]);
+    setSubmissions([]);
     setError(null);
-    clearRequests(activeStorageKey);
+    clearSubmissions(activeStorageKey);
   }, [activeStorageKey]);
 
   const stats = useMemo(() => {
-    const done = requests.filter((item) => item.status === 'done');
-    const counts = new Map();
+    const done = submissions.filter((item) => item.status === 'done');
+
+    const byCategoryCount = new Map();
+    const byPriorityCount = new Map();
     for (const item of done) {
-      if (!item.category) continue;
-      counts.set(item.category.id, (counts.get(item.category.id) ?? 0) + 1);
+      if (item.category) {
+        byCategoryCount.set(item.category.id, (byCategoryCount.get(item.category.id) ?? 0) + 1);
+      }
+      if (item.priority) {
+        byPriorityCount.set(item.priority, (byPriorityCount.get(item.priority) ?? 0) + 1);
+      }
     }
 
     return {
-      total: requests.length,
-      categorized: done.length,
-      pending: requests.filter((item) => item.status === 'pending').length,
-      failed: requests.filter((item) => item.status === 'error').length,
+      total: submissions.length,
+      classified: done.length,
+      pending: submissions.filter((item) => item.status === 'pending').length,
+      failed: submissions.filter((item) => item.status === 'error').length,
       byCategory: categories
-        .map((category) => ({ category, count: counts.get(category.id) ?? 0 }))
+        .map((category) => ({ category, count: byCategoryCount.get(category.id) ?? 0 }))
         .filter((entry) => entry.count > 0)
         .sort((a, b) => b.count - a.count),
+      byPriority: PRIORITIES.map((priority) => ({
+        priority,
+        count: byPriorityCount.get(priority) ?? 0,
+      })).filter((entry) => entry.count > 0),
     };
-  }, [requests, categories]);
+  }, [submissions, categories]);
 
   return {
-    requests,
+    submissions,
     categories,
     stats,
     error,
     isBusy: stats.pending > 0,
+    latest: submissions[submissions.length - 1] ?? null,
     submit,
     retry,
     remove,

@@ -95,16 +95,22 @@ code {
   isolation: isolate;
 }
 
+/*
+ * An abstract dot mesh rather than a photograph. The previous hero shipped a
+ * church image from this project's earlier life -- wrong for a general intake
+ * component, and 272KB for decoration.
+ */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -2;
-  background-image: var(--hero-image);
-  background-position: center;
-  background-size: cover;
-  filter: grayscale(0.4);
-  opacity: 0.34;
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.16) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  mask-image: radial-gradient(80% 70% at 70% 20%, #000 20%, transparent 75%);
 }
 
 .hero::after {
@@ -684,49 +690,227 @@ code {
   font-size: 0.92rem;
 }
 
-/* ---------- categories ---------- */
+/* ---------- presets ---------- */
 
-/*
- * Flex rather than grid: with `repeat(auto-fit, minmax(14rem, 1fr))` the nine
- * chips fill every track, so the last row's single chip stretched across the
- * full width instead of sitting under the others. A fixed basis that doesn't
- * grow lets `justify-content: center` center each row, orphans included.
- */
-.category-grid {
+.preset-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.8rem;
-  /* `auto`, not 0: `.section-alt > *` has the same specificity as this rule
-     (a `>` combinator and `*` both add none), so a plain `margin: 0` here wins
-     on source order and knocks out the centering it applies. */
+  gap: 1rem;
   margin: 0 auto 2rem;
   padding: 0;
   list-style: none;
 }
 
-.category-chip {
-  flex: 0 1 15rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid hsl(var(--hue) 40% 88%);
-  border-left: 3px solid hsl(var(--hue) 58% 52%);
-  border-radius: 10px;
-  background: hsl(var(--hue) 70% 98%);
+.preset-card {
+  flex: 0 1 16rem;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-align: left;
 }
 
-.category-name {
-  display: block;
+.preset-card h3 {
+  font-size: 1.05rem;
+}
+
+.preset-prompt {
+  margin: 0.4rem 0 0.9rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+
+.preset-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preset-cats li {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid hsl(var(--hue) 40% 86%);
+  border-radius: 999px;
+  background: hsl(var(--hue) 70% 97%);
   color: hsl(var(--hue) 62% 32%);
-  font-size: 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ---------- architecture ---------- */
+
+.architecture {
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+.arch-flow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: arch;
+}
+
+.arch-step {
+  position: relative;
+  flex: 1 1 9.5rem;
+  min-width: 0;
+  padding: 1rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-align: left;
+}
+
+/* The chevron between steps -- hidden on the last, and on wrapped rows it
+   simply points at the next card below, which still reads correctly. */
+.arch-step:not(:last-child)::after {
+  content: '›';
+  position: absolute;
+  top: 50%;
+  right: -0.55rem;
+  z-index: 1;
+  transform: translateY(-50%);
+  color: var(--faint);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.arch-client {
+  border-top: 3px solid #94a3b8;
+}
+
+.arch-server {
+  border-top: 3px solid var(--good);
+}
+
+.arch-index {
+  display: block;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.arch-label {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
   font-weight: 700;
 }
 
-.category-desc {
+.arch-note {
   display: block;
   margin-top: 0.2rem;
   color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.arch-caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.2rem;
+  margin: 1.1rem 0 0;
+  color: var(--muted);
   font-size: 0.78rem;
-  line-height: 1.45;
+}
+
+.arch-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 0.1rem;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.arch-key-client {
+  background: #94a3b8;
+}
+
+.arch-key-server {
+  background: var(--good);
+}
+
+.arch-methods {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arch-methods li {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* ---------- result section ---------- */
+
+.quote {
+  margin: 0.8rem 0 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--brand);
+  border-radius: 0 8px 8px 0;
+  background: var(--paper-2);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.mt {
+  margin-top: 1.6rem;
+}
+
+.check-list {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.check-list li {
+  position: relative;
+  margin-bottom: 0.75rem;
+  padding-left: 1.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.check-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--good);
+  font-weight: 700;
+}
+
+.check-list strong {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+}
+
+.check-list code {
+  margin-right: 0.25rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: var(--paper-2);
+  font-size: 0.78rem;
 }
 
 /* ---------- details ---------- */
@@ -814,4 +998,61 @@ code {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ---------- preset + category controls ---------- */
+
+.presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.preset {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.preset:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.preset.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.preset:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.cat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cat-pill {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid hsl(var(--hue) 40% 86%);
+  border-radius: 999px;
+  background: hsl(var(--hue) 70% 97%);
+  color: hsl(var(--hue) 62% 32%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: default;
 }

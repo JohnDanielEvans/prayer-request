@@ -1,16 +1,16 @@
 import { createRoot } from 'react-dom/client';
-import { PrayerRequestWidget } from './widget/PrayerRequestWidget.jsx';
+import { IntakeWidget } from './widget/IntakeWidget.jsx';
 
 /**
  * The no-build path: one script tag on any website, React bundled in.
  *
- *   <div id="prayer"></div>
- *   <script src="prayer-widget.js"></script>
- *   <script>PrayerWidget.mount('#prayer', { endpoint: '/api/categorize' });</script>
+ *   <div id="intake"></div>
+ *   <script src="smart-intake.js"></script>
+ *   <script>SmartIntake.mount('#intake', { endpoint: '/api/classify' });</script>
  *
  * Or fully declarative, with no JS of your own:
  *
- *   <div data-prayer-widget data-endpoint="/api/categorize" data-theme="dark"></div>
+ *   <div data-intake-widget data-endpoint="/api/classify" data-theme="dark"></div>
  *
  * By default the widget renders inside a shadow root. That is the only way to
  * guarantee a stranger's stylesheet -- a Bootstrap reset, a WordPress theme,
@@ -22,7 +22,7 @@ const mounted = new WeakMap();
 export function mount(target, options = {}) {
   const host = resolveHost(target);
   if (!host) {
-    console.error('[PrayerWidget] mount target not found:', target);
+    console.error('[SmartIntake] mount target not found:', target);
     return null;
   }
 
@@ -34,7 +34,7 @@ export function mount(target, options = {}) {
   if (!shadow) injectStylesInto(document.head);
 
   const root = createRoot(container);
-  root.render(<PrayerRequestWidget {...props} />);
+  root.render(<IntakeWidget {...props} />);
 
   const instance = {
     unmount() {
@@ -43,7 +43,7 @@ export function mount(target, options = {}) {
       if (shadow) host.shadowRoot?.replaceChildren();
     },
     update(nextProps) {
-      root.render(<PrayerRequestWidget {...props} {...nextProps} />);
+      root.render(<IntakeWidget {...props} {...nextProps} />);
     },
   };
 
@@ -51,9 +51,9 @@ export function mount(target, options = {}) {
   return instance;
 }
 
-/** Mounts every `[data-prayer-widget]` on the page. Runs automatically on load. */
+/** Mounts every `[data-intake-widget]` on the page. Runs automatically on load. */
 export function autoMount(scope = document) {
-  return Array.from(scope.querySelectorAll('[data-prayer-widget]'))
+  return Array.from(scope.querySelectorAll('[data-intake-widget]'))
     .filter((el) => !mounted.has(el))
     .map((el) => mount(el, readOptions(el)));
 }
@@ -79,12 +79,12 @@ function attachShadowContainer(host) {
  * vite.config.js) so a single file carries both markup and styles.
  */
 function injectStylesInto(node) {
-  const css = globalThis.__PRAYER_WIDGET_CSS__;
+  const css = globalThis.__SMART_INTAKE_CSS__;
   if (!css) return;
-  if (node.querySelector?.('style[data-prayer-widget-styles]')) return;
+  if (node.querySelector?.('style[data-smart-intake-styles]')) return;
 
   const style = document.createElement('style');
-  style.setAttribute('data-prayer-widget-styles', '');
+  style.setAttribute('data-smart-intake-styles', '');
   style.textContent = css;
   node.appendChild(style);
 }
@@ -94,17 +94,17 @@ function readOptions(el) {
   const options = {};
 
   for (const [key, raw] of Object.entries(el.dataset)) {
-    if (key === 'prayerWidget') continue;
+    if (key === 'intakeWidget') continue;
 
-    if (raw === 'true' || raw === 'false') {
-      options[key] = raw === 'true';
-    } else if (raw !== '' && !Number.isNaN(Number(raw))) {
-      options[key] = Number(raw);
-    } else if (key === 'categories') {
+    if (key === 'categories') {
       // Either JSON, or a plain comma-separated list.
       options[key] = raw.trim().startsWith('[')
         ? safeParse(raw)
         : raw.split(',').map((s) => s.trim()).filter(Boolean);
+    } else if (raw === 'true' || raw === 'false') {
+      options[key] = raw === 'true';
+    } else if (raw !== '' && !Number.isNaN(Number(raw))) {
+      options[key] = Number(raw);
     } else {
       options[key] = raw;
     }
@@ -117,7 +117,7 @@ function safeParse(raw) {
   try {
     return JSON.parse(raw);
   } catch {
-    console.warn('[PrayerWidget] could not parse data-categories:', raw);
+    console.warn('[SmartIntake] could not parse data-categories:', raw);
     return undefined;
   }
 }
@@ -130,5 +130,5 @@ if (typeof document !== 'undefined') {
   }
 }
 
-// Named exports only: the IIFE global is `PrayerWidget`, so a default export
-// here would push the API down to `PrayerWidget.default.mount`.
+// Named exports only: the IIFE global is `SmartIntake`, so a default export
+// here would push the API down to `SmartIntake.default.mount`.

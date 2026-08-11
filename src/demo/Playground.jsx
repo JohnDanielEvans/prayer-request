@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
-import { PrayerRequestWidget } from '../widget/PrayerRequestWidget.jsx';
+import { IntakeWidget } from '../widget/IntakeWidget.jsx';
 import { CodeBlock } from './CodeBlock.jsx';
-import { SAMPLE_REQUESTS } from './samples.js';
+import { PRESETS, getPreset, presetProps } from '../lib/presets.js';
+import { PACKAGE_NAME } from '../lib/product.js';
+import { samplesFor } from './samples.js';
 
 const ACCENTS = [
   { value: '#2563eb', name: 'Blue' },
@@ -12,35 +14,80 @@ const ACCENTS = [
 ];
 
 /**
- * Configure the widget, see it change, copy the exact code that produces what
- * you're looking at. The generated snippets are derived from the same state the
- * preview renders from, so they can't drift.
+ * Configure the widget, watch it change, copy the exact code that produces what
+ * you're looking at.
+ *
+ * The preset selector is the important control: switching it changes props on
+ * the same `<IntakeWidget>`. There is no per-preset component or branch anywhere
+ * below this line -- that is the claim the demo exists to make, so it has to be
+ * literally true here.
  */
 export function Playground() {
+  const [presetId, setPresetId] = useState('support');
   const [config, setConfig] = useState({
     theme: 'light',
-    accent: '#2563eb',
+    accent: getPreset('support').accent,
     density: 'comfortable',
     radius: 'md',
     showStats: true,
     showHeader: true,
-    showTimestamps: true,
+    showJson: true,
   });
   const [tab, setTab] = useState('react');
-  const [seed, setSeed] = useState(0);
+  // Bumped on preset change and on Reset so the widget remounts with clean
+  // state. Without it, results classified under the previous preset's
+  // categories would linger beside results from the new one.
+  const [generation, setGeneration] = useState(0);
 
+  const preset = getPreset(presetId);
   const set = (key) => (value) => setConfig((c) => ({ ...c, [key]: value }));
 
-  const snippets = useMemo(() => buildSnippets(config), [config]);
+  const choosePreset = (id) => {
+    setPresetId(id);
+    setConfig((c) => ({ ...c, accent: getPreset(id).accent }));
+    setGeneration((g) => g + 1);
+  };
+
+  const snippets = useMemo(() => buildSnippets(presetId, config), [presetId, config]);
+  const samples = samplesFor(presetId);
 
   return (
     <div className="playground">
-      {/* The sticky panel needs a non-sticky grid item to sit inside:
-          a sticky grid item is constrained by the whole grid, so it would
-          slide down over the code block in the second row. */}
       <div className="playground-sidebar">
         <div className="playground-controls">
           <h3 className="controls-title">Configure</h3>
+
+          <Control label="Preset">
+            <div className="presets">
+              {PRESETS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`preset ${presetId === option.id ? 'is-active' : ''}`}
+                  onClick={() => choosePreset(option.id)}
+                  aria-pressed={presetId === option.id}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <p className="control-hint">{preset.blurb}</p>
+          </Control>
+
+          <Control label="Categories">
+            <ul className="cat-list">
+              {preset.categories.map((category) => (
+                <li
+                  key={category.id}
+                  className="cat-pill"
+                  style={{ '--hue': category.hue }}
+                  title={category.description}
+                >
+                  {category.label}
+                </li>
+              ))}
+            </ul>
+          </Control>
 
           <Control label="Theme">
             <Segmented
@@ -96,32 +143,20 @@ export function Playground() {
 
           <Control label="Show">
             <div className="toggles">
-              <Toggle
-                label="Header"
-                checked={config.showHeader}
-                onChange={set('showHeader')}
-              />
-              <Toggle
-                label="Breakdown"
-                checked={config.showStats}
-                onChange={set('showStats')}
-              />
-              <Toggle
-                label="Timestamps"
-                checked={config.showTimestamps}
-                onChange={set('showTimestamps')}
-              />
+              <Toggle label="Header" checked={config.showHeader} onChange={set('showHeader')} />
+              <Toggle label="Breakdown" checked={config.showStats} onChange={set('showStats')} />
+              <Toggle label="JSON view" checked={config.showJson} onChange={set('showJson')} />
             </div>
           </Control>
 
           <Control label="Try an example">
             <div className="samples">
-              {SAMPLE_REQUESTS.map((sample) => (
+              {samples.map((sample) => (
                 <button
                   key={sample.label}
                   type="button"
                   className="sample"
-                  onClick={() => copyToField(sample.text)}
+                  onClick={() => fillField(sample.text)}
                   title={sample.text}
                 >
                   {sample.label}
@@ -129,38 +164,37 @@ export function Playground() {
               ))}
             </div>
             <p className="control-hint">
-              Fills the field below. The demo runs the offline provider, so
-              nothing you type leaves this page.
+              Fills the field. The demo runs the offline classifier, so nothing
+              you type leaves this page.
             </p>
           </Control>
         </div>
       </div>
 
-      <div
-        className={`playground-preview ${config.theme === 'dark' ? 'is-dark' : ''}`}
-      >
+      <div className={`playground-preview ${config.theme === 'dark' ? 'is-dark' : ''}`}>
         <div className="preview-chrome">
           <span className="preview-dots" aria-hidden="true">
             <i />
             <i />
             <i />
           </span>
-          <span className="preview-url">your-church.org/prayer</span>
+          <span className="preview-url">{urlFor(presetId)}</span>
           <button
             type="button"
             className="preview-reset"
-            onClick={() => setSeed((s) => s + 1)}
-            title="Reset the widget"
+            onClick={() => setGeneration((g) => g + 1)}
+            title="Clear results and start over"
           >
             Reset
           </button>
         </div>
 
         <div className="preview-stage">
-          <PrayerRequestWidget
-            key={seed}
+          <IntakeWidget
+            key={`${presetId}-${generation}`}
             provider="mock"
             persist={false}
+            {...presetProps(presetId)}
             {...config}
           />
         </div>
@@ -185,10 +219,7 @@ export function Playground() {
             </button>
           ))}
         </div>
-        <CodeBlock
-          code={snippets[tab]}
-          label={tab === 'html' ? 'index.html' : 'App.jsx'}
-        />
+        <CodeBlock code={snippets[tab]} label={tab === 'html' ? 'index.html' : 'App.jsx'} />
       </div>
     </div>
   );
@@ -233,11 +264,22 @@ function Toggle({ label, checked, onChange }) {
   );
 }
 
+const HOSTS = {
+  support: 'app.example.com/support',
+  sales: 'example.com/contact',
+  community: 'example.org/get-help',
+  prayer: 'your-church.org/prayer',
+};
+
+function urlFor(presetId) {
+  return HOSTS[presetId] ?? HOSTS.support;
+}
+
 /**
- * The demo widget owns its own textarea state, so the sample buttons write into
- * the DOM node and dispatch the event React listens for. Fine for a demo affordance.
+ * The widget owns its own textarea state, so the sample buttons write into the
+ * DOM node and dispatch the event React listens for. Fine as a demo affordance.
  */
-function copyToField(text) {
+function fillField(text) {
   const textarea = document.querySelector('.preview-stage textarea');
   if (!textarea) return;
 
@@ -250,42 +292,55 @@ function copyToField(text) {
   textarea.focus();
 }
 
-function buildSnippets(config) {
+function buildSnippets(presetId, config) {
+  const preset = getPreset(presetId);
+  const categoryList = preset.categories.map((c) => `  '${c.label}',`).join('\n');
+
   const props = [
     'provider="endpoint"',
-    'endpoint="/api/categorize"',
+    'endpoint="/api/classify"',
+    `title=${JSON.stringify(preset.prompt)}`,
+    'categories={categories}',
     `theme="${config.theme}"`,
     `accent="${config.accent}"`,
     config.density !== 'comfortable' && `density="${config.density}"`,
     config.radius !== 'md' && `radius="${config.radius}"`,
     !config.showHeader && 'showHeader={false}',
     !config.showStats && 'showStats={false}',
-    !config.showTimestamps && 'showTimestamps={false}',
+    !config.showJson && 'showJson={false}',
   ].filter(Boolean);
 
-  const react = `import { PrayerRequestWidget } from 'prayer-request-widget';
-import 'prayer-request-widget/styles.css';
+  const react = `import { IntakeWidget } from '${PACKAGE_NAME}';
+import '${PACKAGE_NAME}/styles.css';
 
-export function PrayerPage() {
+const categories = [
+${categoryList}
+];
+
+export function ContactPage() {
   return (
-    <PrayerRequestWidget
+    <IntakeWidget
       ${props.join('\n      ')}
-      onResult={(result) => console.log(result.category.label)}
+      onClassified={(result) => {
+        // { category, priority, tags, confidence, summary }
+        routeToTeam(result.category.id, result.priority);
+      }}
     />
   );
 }`;
 
   const dataAttrs = [
-    'data-prayer-widget',
+    'data-intake-widget',
     'data-provider="endpoint"',
-    'data-endpoint="/api/categorize"',
+    'data-endpoint="/api/classify"',
+    `data-title="${preset.prompt}"`,
+    `data-categories="${preset.categories.map((c) => c.label).join(',')}"`,
     `data-theme="${config.theme}"`,
     `data-accent="${config.accent}"`,
     config.density !== 'comfortable' && `data-density="${config.density}"`,
-    config.radius !== 'md' && `data-radius="${config.radius}"`,
     !config.showHeader && 'data-show-header="false"',
     !config.showStats && 'data-show-stats="false"',
-    !config.showTimestamps && 'data-show-timestamps="false"',
+    !config.showJson && 'data-show-json="false"',
   ].filter(Boolean);
 
   const html = `<!-- Anywhere on the page -->
@@ -293,27 +348,35 @@ export function PrayerPage() {
   ${dataAttrs.join('\n  ')}
 ></div>
 
-<script src="https://your-cdn.com/prayer-widget.js" defer></script>`;
+<script src="https://your-cdn.com/smart-intake.js" defer></script>`;
 
-  const headless = `import { usePrayerRequests } from 'prayer-request-widget';
+  const headless = `import { useIntake } from '${PACKAGE_NAME}';
 
-// Same categorization, retry, and persistence -- your own markup.
-export function CustomPrayerBoard() {
-  const { requests, submit, stats } = usePrayerRequests({
+// Same classification, retry and persistence -- your own markup.
+export function CustomIntake() {
+  const { submissions, submit, stats, isBusy } = useIntake({
     provider: 'endpoint',
-    endpoint: '/api/categorize',
+    endpoint: '/api/classify',
+    categories,
+    onClassified: (result) => {
+      // { category, priority, tags, confidence, summary }
+      sendToBackend(result);
+    },
   });
 
   return (
-    <div>
-      <MyForm onSubmit={submit} />
-      {stats.byCategory.map(({ category, count }) => (
-        <MyBar key={category.id} label={category.label} count={count} />
+    <>
+      <MyForm onSubmit={submit} busy={isBusy} />
+      {submissions.map((item) => (
+        <MyRow
+          key={item.id}
+          text={item.text}
+          category={item.category?.label}
+          priority={item.priority}
+          tags={item.tags}
+        />
       ))}
-      {requests.map((r) => (
-        <MyCard key={r.id} text={r.text} category={r.category} />
-      ))}
-    </div>
+    </>
   );
 }`;
 

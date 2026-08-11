@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Embed test — hostile host page</title>
+    <title>Smart Intake embed test — hostile host page</title>
 
     <style>
       /*
@@ -38,13 +38,20 @@
         text-shadow: 4px 4px 0 cyan;
       }
       ul,
-      li {
+      li,
+      dl,
+      dd {
         list-style: square inside;
+        margin-left: 40px;
         padding-left: 40px;
       }
       p {
         margin: 40px 0;
         line-height: 4;
+      }
+      pre {
+        background: #ff0;
+        color: #f0f;
       }
 
       body {
@@ -76,27 +83,29 @@
 
   <body>
     <h3 style="font-family: system-ui, sans-serif">
-      Embed test: three mounts on one page
+      Smart Intake embed test: three mounts on one page
     </h3>
 
     <div class="panel">
       <h3>1. Declarative — no JavaScript of your own</h3>
       <p class="note">
-        The page just has a <code>&lt;div data-prayer-widget&gt;</code>. The
-        script finds it on load and mounts into a shadow root.
+        The page just has a <code>&lt;div data-intake-widget&gt;</code>. The
+        script finds it on load and mounts into a shadow root. Categories come
+        from a comma-separated attribute.
       </p>
       <div
-        data-prayer-widget
-        data-title="How can we pray for you?"
-        data-accent="#0f766e"
+        data-intake-widget
+        data-title="How can we help?"
+        data-categories="Billing,Technical Support,Account,Bug Report,General"
+        data-accent="#2563eb"
         data-persist="false"
       ></div>
     </div>
 
     <div class="panel">
-      <h3>2. Imperative — dark theme, custom categories, compact</h3>
+      <h3>2. Imperative — dark theme, sales categories, compact</h3>
       <p class="note">
-        Mounted via <code>PrayerWidget.mount()</code> with options passed as an
+        Mounted via <code>SmartIntake.mount()</code> with options passed as an
         object.
       </p>
       <div id="dark-mount"></div>
@@ -106,26 +115,26 @@
       <h3>3. Shadow DOM off — inherits the host's terrible CSS</h3>
       <p class="note">
         Same widget with <code>shadow: false</code>. Scoped class names still
-        prevent the widget from leaking out, but the host's
-        <code>button</code> and <code>textarea</code> rules now leak
+        stop the widget leaking out, but the host's <code>button</code>,
+        <code>textarea</code> and <code>list</code> rules now leak
         <em>in</em>. This is the failure mode shadow DOM exists to prevent.
       </p>
       <div id="leaky-mount"></div>
     </div>
 
-    <script src="../dist-embed/prayer-widget.js"></script>
+    <script src="../dist-embed/smart-intake.js"></script>
     <script>
-      PrayerWidget.mount('#dark-mount', {
+      SmartIntake.mount('#dark-mount', {
         theme: 'dark',
-        accent: '#7c3aed',
+        accent: '#0f766e',
         density: 'compact',
         persist: false,
-        title: 'Submit a request',
-        subtitle: 'Sorted for the prayer team.',
-        categories: ['Health', 'Family', 'Missions', 'Gratitude'],
+        title: 'What can we help you with?',
+        subtitle: 'Tell us about your project.',
+        categories: ['New Project', 'Pricing', 'Partnership', 'Existing Client'],
       });
 
-      PrayerWidget.mount('#leaky-mount', {
+      SmartIntake.mount('#leaky-mount', {
         shadow: false,
         persist: false,
         showHeader: false,

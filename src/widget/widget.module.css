@@ -5,55 +5,68 @@
  * elements we render, rather than shipping a full reset.
  *
  * Tokens live on .widget so a host can override any of them:
- *   .prw-widget { --prw-accent: #7c3aed; }
+ *   .si-widget { --si-accent: #7c3aed; }
  */
 
 .widget {
   /* Palette (light) */
-  --prw-bg: #ffffff;
-  --prw-bg-subtle: #f6f7f9;
-  --prw-border: #e3e6ea;
-  --prw-border-strong: #cfd4da;
-  --prw-text: #16181d;
-  --prw-text-muted: #5c6470;
-  --prw-text-faint: #858d99;
-  --prw-danger: #c0362c;
-  --prw-danger-bg: #fdf1f0;
+  --si-bg: #ffffff;
+  --si-bg-subtle: #f6f7f9;
+  --si-border: #e3e6ea;
+  --si-border-strong: #cfd4da;
+  --si-text: #16181d;
+  --si-text-muted: #5c6470;
+  --si-text-faint: #858d99;
+  --si-danger: #c0362c;
+  --si-danger-bg: #fdf1f0;
 
-  --prw-accent: #2563eb;
-  --prw-accent-strong: #1d4ed8;
-  --prw-accent-soft: rgba(37, 99, 235, 0.1);
-  --prw-accent-contrast: #ffffff;
+  --si-accent: #2563eb;
+  --si-accent-strong: #1d4ed8;
+  --si-accent-soft: rgba(37, 99, 235, 0.1);
+  --si-accent-contrast: #ffffff;
 
   /* Category colors are derived from one hue per category. */
-  --prw-cat-hue: 220;
-  --prw-cat-color: hsl(var(--prw-cat-hue) 62% 38%);
-  --prw-cat-bg: hsl(var(--prw-cat-hue) 70% 96%);
-  --prw-cat-border: hsl(var(--prw-cat-hue) 50% 86%);
-  --prw-cat-solid: hsl(var(--prw-cat-hue) 58% 52%);
+  --si-cat-hue: 220;
+  /*
+   * Saturation+lightness pairs, NOT finished colors. A custom property whose
+   * value contains var() is substituted where it is *declared*, so deriving
+   * --si-cat-bg here would bake in this element's hue and ignore the per-item
+   * hue set further down the tree. Keeping the hue out of these means the
+   * hsl() is assembled at the point of use, where the local hue is in scope.
+   */
+  --si-cat-sl-color: 62% 38%;
+  --si-cat-sl-bg: 70% 96%;
+  --si-cat-sl-border: 50% 86%;
+  --si-cat-sl-solid: 58% 52%;
+
+  /* Priority runs on its own fixed ramp -- see priorityVars() in lib/theme.js. */
+  --si-pri-hue: 195;
+  --si-pri-sl-color: 72% 24%;
+  --si-pri-sl-bg: 68% 90%;
+  --si-pri-sl-solid: 62% 48%;
 
   /* Shape and rhythm */
-  --prw-radius: 14px;
-  --prw-radius-sm: 8px;
-  --prw-gap: 1rem;
-  --prw-pad: 1.5rem;
-  --prw-max-width: 34rem;
-  --prw-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+  --si-radius: 14px;
+  --si-radius-sm: 8px;
+  --si-gap: 1rem;
+  --si-pad: 1.5rem;
+  --si-max-width: 34rem;
+  --si-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
-  --prw-shadow: 0 1px 2px rgba(16, 18, 23, 0.04),
+  --si-shadow: 0 1px 2px rgba(16, 18, 23, 0.04),
     0 8px 24px -12px rgba(16, 18, 23, 0.18);
 
   box-sizing: border-box;
   width: 100%;
-  max-width: var(--prw-max-width);
+  max-width: var(--si-max-width);
   margin: 0 auto;
-  padding: var(--prw-pad);
-  border: 1px solid var(--prw-border);
-  border-radius: var(--prw-radius);
-  background: var(--prw-bg);
-  box-shadow: var(--prw-shadow);
-  color: var(--prw-text);
-  font-family: var(--prw-font);
+  padding: var(--si-pad);
+  border: 1px solid var(--si-border);
+  border-radius: var(--si-radius);
+  background: var(--si-bg);
+  box-shadow: var(--si-shadow);
+  color: var(--si-text);
+  font-family: var(--si-font);
   font-size: 15px;
   line-height: 1.55;
   text-align: left;
@@ -62,33 +75,37 @@
 }
 
 .theme_dark {
-  --prw-bg: #16181d;
-  --prw-bg-subtle: #1e2128;
-  --prw-border: #2c3038;
-  --prw-border-strong: #3d434e;
-  --prw-text: #eef0f4;
-  --prw-text-muted: #a4acba;
-  --prw-text-faint: #79818f;
-  --prw-danger: #ff8f84;
-  --prw-danger-bg: rgba(192, 54, 44, 0.14);
+  --si-bg: #16181d;
+  --si-bg-subtle: #1e2128;
+  --si-border: #2c3038;
+  --si-border-strong: #3d434e;
+  --si-text: #eef0f4;
+  --si-text-muted: #a4acba;
+  --si-text-faint: #79818f;
+  --si-danger: #ff8f84;
+  --si-danger-bg: rgba(192, 54, 44, 0.14);
 
-  --prw-accent: #5b8cff;
-  --prw-accent-strong: #7aa1ff;
-  --prw-accent-soft: rgba(91, 140, 255, 0.16);
-  --prw-accent-contrast: #0d1017;
+  --si-accent: #5b8cff;
+  --si-accent-strong: #7aa1ff;
+  --si-accent-soft: rgba(91, 140, 255, 0.16);
+  --si-accent-contrast: #0d1017;
 
-  --prw-cat-color: hsl(var(--prw-cat-hue) 70% 74%);
-  --prw-cat-bg: hsl(var(--prw-cat-hue) 40% 18%);
-  --prw-cat-border: hsl(var(--prw-cat-hue) 35% 28%);
-  --prw-cat-solid: hsl(var(--prw-cat-hue) 62% 62%);
+  --si-cat-sl-color: 70% 74%;
+  --si-cat-sl-bg: 40% 18%;
+  --si-cat-sl-border: 35% 28%;
+  --si-cat-sl-solid: 62% 62%;
 
-  --prw-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+  --si-pri-sl-color: 80% 82%;
+  --si-pri-sl-bg: 48% 24%;
+  --si-pri-sl-solid: 65% 62%;
+
+  --si-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.7);
   color-scheme: dark;
 }
 
 .compact {
-  --prw-pad: 1rem;
-  --prw-gap: 0.7rem;
+  --si-pad: 1rem;
+  --si-gap: 0.7rem;
   font-size: 14px;
 }
 
@@ -101,12 +118,12 @@
 /* ---------- header ---------- */
 
 .header {
-  margin: 0 0 var(--prw-gap);
+  margin: 0 0 var(--si-gap);
 }
 
 .title {
   margin: 0;
-  color: var(--prw-text);
+  color: var(--si-text);
   font-family: inherit;
   font-size: 1.3rem;
   font-weight: 600;
@@ -117,7 +134,7 @@
 
 .subtitle {
   margin: 0.35rem 0 0;
-  color: var(--prw-text-muted);
+  color: var(--si-text-muted);
   font-size: 0.9rem;
   line-height: 1.5;
 }
@@ -137,10 +154,10 @@
   width: 100%;
   min-height: 7rem;
   padding: 0.75rem 0.85rem 1.6rem;
-  border: 1px solid var(--prw-border-strong);
-  border-radius: var(--prw-radius-sm);
-  background: var(--prw-bg);
-  color: var(--prw-text);
+  border: 1px solid var(--si-border-strong);
+  border-radius: var(--si-radius-sm);
+  background: var(--si-bg);
+  color: var(--si-text);
   font-family: inherit;
   font-size: inherit;
   line-height: 1.55;
@@ -149,17 +166,17 @@
 }
 
 .textarea::placeholder {
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
 }
 
 .textarea:focus {
-  border-color: var(--prw-accent);
-  box-shadow: 0 0 0 3px var(--prw-accent-soft);
+  border-color: var(--si-accent);
+  box-shadow: 0 0 0 3px var(--si-accent-soft);
   outline: none;
 }
 
 .textarea:disabled {
-  background: var(--prw-bg-subtle);
+  background: var(--si-bg-subtle);
   cursor: not-allowed;
 }
 
@@ -167,14 +184,14 @@
   position: absolute;
   right: 0.7rem;
   bottom: 0.55rem;
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
 
 .counterWarn {
-  color: var(--prw-danger);
+  color: var(--si-danger);
 }
 
 .formFooter {
@@ -187,7 +204,7 @@
 
 .helper {
   margin: 0;
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-size: 0.78rem;
   line-height: 1.4;
 }
@@ -199,9 +216,9 @@
   gap: 0.45rem;
   padding: 0.55rem 1.05rem;
   border: none;
-  border-radius: var(--prw-radius-sm);
-  background: var(--prw-accent);
-  color: var(--prw-accent-contrast);
+  border-radius: var(--si-radius-sm);
+  background: var(--si-accent);
+  color: var(--si-accent-contrast);
   font-family: inherit;
   font-size: 0.88rem;
   font-weight: 600;
@@ -212,7 +229,7 @@
 }
 
 .submit:hover:not(:disabled) {
-  background: var(--prw-accent-strong);
+  background: var(--si-accent-strong);
 }
 
 .submit:active:not(:disabled) {
@@ -220,7 +237,7 @@
 }
 
 .submit:focus-visible {
-  outline: 2px solid var(--prw-accent);
+  outline: 2px solid var(--si-accent);
   outline-offset: 2px;
 }
 
@@ -234,16 +251,16 @@
   align-items: center;
   gap: 0.35rem;
   margin: 0.75rem 0 0;
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-size: 0.75rem;
 }
 
 /* ---------- stats ---------- */
 
 .stats {
-  margin-top: calc(var(--prw-gap) * 1.4);
-  padding-top: var(--prw-gap);
-  border-top: 1px solid var(--prw-border);
+  margin-top: calc(var(--si-gap) * 1.4);
+  padding-top: var(--si-gap);
+  border-top: 1px solid var(--si-border);
 }
 
 .statsHeader {
@@ -255,7 +272,7 @@
 }
 
 .statsTitle {
-  color: var(--prw-text-muted);
+  color: var(--si-text-muted);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -263,7 +280,7 @@
 }
 
 .statsCount {
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
@@ -279,7 +296,7 @@
 .statsSegment {
   min-width: 6px;
   border-radius: 999px;
-  background: var(--prw-cat-solid);
+  background: hsl(var(--si-cat-hue) var(--si-cat-sl-solid));
   transition: flex-grow 0.35s ease;
 }
 
@@ -296,7 +313,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: var(--prw-text-muted);
+  color: var(--si-text-muted);
   font-size: 0.78rem;
 }
 
@@ -304,11 +321,18 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--prw-cat-solid);
+  background: hsl(var(--si-cat-hue) var(--si-cat-sl-solid));
+}
+
+.legendPip {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: hsl(var(--si-pri-hue) var(--si-pri-sl-solid));
 }
 
 .legendCount {
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -320,11 +344,11 @@
   justify-content: space-between;
   gap: 0.5rem;
   min-height: 1.2rem;
-  margin-top: calc(var(--prw-gap) * 1.4);
+  margin-top: calc(var(--si-gap) * 1.4);
 }
 
 .listTitle {
-  color: var(--prw-text-muted);
+  color: var(--si-text-muted);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -337,9 +361,9 @@
   gap: 0.3rem;
   padding: 0.2rem 0.4rem;
   border: none;
-  border-radius: var(--prw-radius-sm);
+  border-radius: var(--si-radius-sm);
   background: none;
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-family: inherit;
   font-size: 0.76rem;
   cursor: pointer;
@@ -347,12 +371,12 @@
 }
 
 .textButton:hover {
-  background: var(--prw-bg-subtle);
-  color: var(--prw-danger);
+  background: var(--si-bg-subtle);
+  color: var(--si-danger);
 }
 
 .textButton:focus-visible {
-  outline: 2px solid var(--prw-accent);
+  outline: 2px solid var(--si-accent);
   outline-offset: 1px;
 }
 
@@ -368,63 +392,74 @@
 .empty {
   margin: 0.9rem 0 0;
   padding: 1.4rem 1rem;
-  border: 1px dashed var(--prw-border-strong);
-  border-radius: var(--prw-radius-sm);
-  color: var(--prw-text-faint);
+  border: 1px dashed var(--si-border-strong);
+  border-radius: var(--si-radius-sm);
+  color: var(--si-text-faint);
   font-size: 0.85rem;
   text-align: center;
 }
 
-.item {
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--prw-border);
-  border-left: 3px solid var(--prw-cat-solid);
-  border-radius: var(--prw-radius-sm);
-  background: var(--prw-bg-subtle);
-  animation: prwSlideIn 0.28s ease both;
+/* ---------- result card ---------- */
+
+.card {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--si-border);
+  border-left: 3px solid hsl(var(--si-cat-hue) var(--si-cat-sl-solid));
+  border-radius: var(--si-radius-sm);
+  background: var(--si-bg-subtle);
+  animation: siSlideIn 0.28s ease both;
 }
 
-.item_pending {
-  border-left-color: var(--prw-border-strong);
+.card_pending {
+  border-left-color: var(--si-border-strong);
 }
 
-.item_error {
-  border-left-color: var(--prw-danger);
-  background: var(--prw-danger-bg);
+.card_error {
+  border-left-color: var(--si-danger);
+  background: var(--si-danger-bg);
 }
 
-.itemHeader {
+.cardHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 0.6rem;
 }
 
-.itemActions {
+.cardText {
+  margin: 0;
+  color: var(--si-text);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.cardActions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 
-.item:hover .itemActions,
-.item:focus-within .itemActions {
+.card:hover .cardActions,
+.card:focus-within .cardActions {
   opacity: 1;
 }
 
 /* Touch devices have no hover, so the controls must always be reachable. */
 @media (hover: none) {
-  .itemActions {
+  .cardActions {
     opacity: 1;
   }
 }
 
 .timestamp {
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .iconButton {
@@ -435,55 +470,108 @@
   border: none;
   border-radius: 5px;
   background: none;
-  color: var(--prw-text-faint);
+  color: var(--si-text-faint);
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
 .iconButton:hover {
-  background: var(--prw-bg);
-  color: var(--prw-text);
+  background: var(--si-bg);
+  color: var(--si-text);
 }
 
 .iconButton:focus-visible {
-  outline: 2px solid var(--prw-accent);
+  outline: 2px solid var(--si-accent);
   outline-offset: 1px;
   opacity: 1;
 }
 
-.itemText {
-  margin: 0;
-  color: var(--prw-text);
-  font-size: 0.92rem;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
+/*
+ * The classification, as labelled fields rather than a sentence. This is the
+ * part someone triaging an inbox actually reads, so it gets real structure.
+ */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.7rem 1rem;
+  margin: 0.85rem 0 0;
+  padding: 0.8rem 0 0;
+  border-top: 1px solid var(--si-border);
 }
 
-.itemSummary {
-  margin: 0.45rem 0 0;
-  color: var(--prw-text-muted);
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  color: var(--si-text-faint);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fieldValue {
+  margin: 0;
+  min-width: 0;
+}
+
+.summary {
+  margin: 0.7rem 0 0;
+  color: var(--si-text-muted);
   font-size: 0.8rem;
   font-style: italic;
 }
 
-.itemError {
-  margin: 0.45rem 0 0;
-  color: var(--prw-danger);
-  font-size: 0.8rem;
+.json {
+  margin: 0.75rem 0 0;
+  padding: 0.7rem 0.8rem;
+  overflow-x: auto;
+  border: 1px solid var(--si-border);
+  border-radius: var(--si-radius-sm);
+  background: var(--si-bg);
+  color: var(--si-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.pendingRow,
+.errorRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  color: var(--si-text-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.errorRow {
+  color: var(--si-danger);
+  font-weight: 500;
 }
 
 /* ---------- badges ---------- */
 
 .badge {
   display: inline-flex;
+  align-self: flex-start;
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.55rem;
-  border: 1px solid var(--prw-cat-border);
+  border: 1px solid hsl(var(--si-cat-hue) var(--si-cat-sl-border));
   border-radius: 999px;
-  background: var(--prw-cat-bg);
-  color: var(--prw-cat-color);
-  font-size: 0.76rem;
+  background: hsl(var(--si-cat-hue) var(--si-cat-sl-bg));
+  color: hsl(var(--si-cat-hue) var(--si-cat-sl-color));
+  font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -496,29 +584,85 @@
 .badgeDot {
   width: 6px;
   height: 6px;
+  flex-shrink: 0;
   border-radius: 50%;
-  background: var(--prw-cat-solid);
+  background: hsl(var(--si-cat-hue) var(--si-cat-sl-solid));
 }
 
-.badgeConfidence {
-  color: var(--prw-cat-color);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.75;
-}
-
-.pendingBadge,
-.errorBadge {
+/*
+ * Priority gets a solid fill where category gets a tint: it is the field people
+ * scan for, and it has to read the same whatever category sits beside it.
+ */
+.priority {
   display: inline-flex;
+  align-self: flex-start;
   align-items: center;
-  gap: 0.4rem;
-  color: var(--prw-text-faint);
-  font-size: 0.76rem;
-  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: hsl(var(--si-pri-hue) var(--si-pri-sl-bg));
+  color: hsl(var(--si-pri-hue) var(--si-pri-sl-color));
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
 }
 
-.errorBadge {
-  color: var(--prw-danger);
+.priorityUrgent {
+  animation: siPulseBadge 2s ease-in-out infinite;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--si-border-strong);
+  border-radius: 5px;
+  background: var(--si-bg);
+  color: var(--si-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.tagsSm .tag {
+  font-size: 0.68rem;
+}
+
+.confidence {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.confidenceTrack {
+  flex: 1;
+  min-width: 2.5rem;
+  max-width: 5rem;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--si-border);
+}
+
+.confidenceFill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: hsl(var(--si-cat-hue) var(--si-cat-sl-solid));
+  transition: width 0.4s ease;
+}
+
+.confidenceValue {
+  color: var(--si-text-muted);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .pendingDots {
@@ -531,7 +675,7 @@
   height: 5px;
   border-radius: 50%;
   background: currentColor;
-  animation: prwPulse 1.2s ease-in-out infinite;
+  animation: siPulse 1.2s ease-in-out infinite;
 }
 
 .pendingDots i:nth-child(2) {
@@ -543,7 +687,7 @@
 }
 
 .spinning {
-  animation: prwSpin 0.8s linear infinite;
+  animation: siSpin 0.8s linear infinite;
 }
 
 /* ---------- utility ---------- */
@@ -561,7 +705,7 @@
   white-space: nowrap;
 }
 
-@keyframes prwSlideIn {
+@keyframes siSlideIn {
   from {
     opacity: 0;
     transform: translateY(-6px);
@@ -572,7 +716,7 @@
   }
 }
 
-@keyframes prwPulse {
+@keyframes siPulse {
   0%,
   100% {
     opacity: 0.3;
@@ -582,9 +726,20 @@
   }
 }
 
-@keyframes prwSpin {
+@keyframes siSpin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* The one place motion carries meaning rather than polish. */
+@keyframes siPulseBadge {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 4px hsl(var(--si-pri-hue) var(--si-pri-sl-bg));
   }
 }
 
@@ -607,7 +762,7 @@
 
 @media (max-width: 30rem) {
   .widget {
-    --prw-pad: 1.1rem;
+    --si-pad: 1.1rem;
   }
 
   .formFooter {

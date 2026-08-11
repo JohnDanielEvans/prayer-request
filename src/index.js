@@ -1,28 +1,50 @@
 /**
  * Public API for React consumers.
  *
- *   import { PrayerRequestWidget } from 'prayer-request-widget';
- *   import 'prayer-request-widget/styles.css';
+ *   import { IntakeWidget } from 'smart-intake-widget';
+ *   import 'smart-intake-widget/styles.css';
  */
-export { PrayerRequestWidget, default } from './widget/PrayerRequestWidget.jsx';
+export { IntakeWidget, default } from './widget/IntakeWidget.jsx';
 
-// Headless: bring your own UI, keep the categorization, retry, and persistence.
-export { usePrayerRequests } from './lib/usePrayerRequests.js';
+// Headless: bring your own UI, keep the classification, retry and persistence.
+export { useIntake } from './lib/useIntake.js';
 
-// Providers, for custom or additional backends.
+// Providers, for custom or additional classifiers.
 export {
   resolveProvider,
   createMockProvider,
   createEndpointProvider,
   createOpenAIProvider,
+  buildSystemPrompt,
+  toClassification,
 } from './lib/providers/index.js';
 
-// Categories and the prompt, so a server can classify exactly as the client does.
+// Categories and presets.
 export {
   DEFAULT_CATEGORIES,
   FALLBACK_CATEGORY_ID,
   resolveCategories,
+  fallbackCategory,
 } from './lib/categories.js';
-export { buildSystemPrompt } from './lib/providers/openai.js';
-export { matchCategory, scoreCategories } from './lib/normalize.js';
-export { CategorizeError } from './lib/http.js';
+export { PRESETS, DEFAULT_PRESET_ID, getPreset, presetProps } from './lib/presets.js';
+
+// The classification schema, exported so a server can validate identically.
+export {
+  PRIORITIES,
+  DEFAULT_PRIORITY,
+  MAX_TAGS,
+  normalizePriority,
+  normalizeTags,
+  normalizeConfidence,
+  maxPriority,
+} from './lib/classification.js';
+export {
+  matchCategory,
+  scoreCategories,
+  extractTags,
+  detectUrgency,
+  resolvePriority,
+} from './lib/normalize.js';
+
+export { ClassificationError } from './lib/http.js';
+export { PRODUCT_NAME, PACKAGE_NAME } from './lib/product.js';

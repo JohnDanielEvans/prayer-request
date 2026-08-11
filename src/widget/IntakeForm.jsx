@@ -2,7 +2,7 @@ import { useId, useRef, useState } from 'react';
 import { SendIcon, SpinnerIcon } from './Icons.jsx';
 import styles from './widget.module.css';
 
-export function RequestForm({
+export function IntakeForm({
   onSubmit,
   placeholder,
   submitLabel,
@@ -30,7 +30,7 @@ export function RequestForm({
     onSubmit(trimmed);
     setValue('');
     setTouched(false);
-    // Keep focus in the field: people often submit several requests in a row.
+    // Keep focus in the field: people often submit several messages in a row.
     textareaRef.current?.focus();
   };
 
@@ -75,18 +75,10 @@ export function RequestForm({
 
       <div className={styles.formFooter}>
         <p className={styles.helper} id={helperId}>
-          {showEmptyError ? 'Please write your request first.' : helperText}
+          {showEmptyError ? 'Please write your message first.' : helperText}
         </p>
-        <button
-          className={styles.submit}
-          type="submit"
-          disabled={disabled || isEmpty}
-        >
-          {isBusy ? (
-            <SpinnerIcon className={styles.spinning} />
-          ) : (
-            <SendIcon />
-          )}
+        <button className={styles.submit} type="submit" disabled={disabled || isEmpty}>
+          {isBusy ? <SpinnerIcon className={styles.spinning} /> : <SendIcon />}
           {submitLabel}
         </button>
       </div>

@@ -4,7 +4,7 @@
  *
  * Override any of these from the host stylesheet:
  *
- *   .my-wrapper .prw-widget { --prw-accent: #7c3aed; --prw-radius: 4px; }
+ *   .my-wrapper .si-widget { --si-accent: #7c3aed; --si-radius: 4px; }
  */
 const RADII = { sm: '6px', md: '12px', lg: '18px', xl: '26px' };
 
@@ -12,15 +12,15 @@ export function buildThemeVars({ accent, radius, fontFamily, maxWidth } = {}) {
   const vars = {};
 
   if (accent) {
-    vars['--prw-accent'] = accent;
+    vars['--si-accent'] = accent;
     // Derive the hover shade in-browser rather than asking for two props.
-    vars['--prw-accent-strong'] = `color-mix(in srgb, ${accent} 82%, black)`;
-    vars['--prw-accent-soft'] = `color-mix(in srgb, ${accent} 14%, transparent)`;
+    vars['--si-accent-strong'] = `color-mix(in srgb, ${accent} 82%, black)`;
+    vars['--si-accent-soft'] = `color-mix(in srgb, ${accent} 14%, transparent)`;
   }
-  if (radius) vars['--prw-radius'] = RADII[radius] ?? radius;
-  if (fontFamily) vars['--prw-font'] = fontFamily;
+  if (radius) vars['--si-radius'] = RADII[radius] ?? radius;
+  if (fontFamily) vars['--si-font'] = fontFamily;
   if (maxWidth) {
-    vars['--prw-max-width'] =
+    vars['--si-max-width'] =
       typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
   }
 
@@ -30,5 +30,18 @@ export function buildThemeVars({ accent, radius, fontFamily, maxWidth } = {}) {
 /** Per-category color, derived from the category's hue and the active theme. */
 export function categoryVars(category) {
   if (!category) return {};
-  return { '--prw-cat-hue': String(category.hue ?? 220) };
+  return { '--si-cat-hue': String(category.hue ?? 220) };
+}
+
+/**
+ * Priority uses a fixed four-step ramp rather than per-category hues: "high"
+ * has to look the same whatever bucket it lands in, or the badge stops being
+ * scannable at a glance.
+ */
+const PRIORITY_HUES = { low: 215, normal: 195, high: 32, urgent: 0 };
+
+export function priorityVars(priority) {
+  return {
+    '--si-pri-hue': String(PRIORITY_HUES[priority] ?? PRIORITY_HUES.normal),
+  };
 }

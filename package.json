@@ -1,19 +1,17 @@
 {
-  "name": "prayer-request-widget",
-  "version": "2.0.0",
-  "description": "An embeddable, AI-powered prayer request categorizer. Drop it into any React app as a component, or into any website with a single script tag.",
+  "name": "smart-intake-widget",
+  "version": "3.0.0",
+  "description": "An embeddable smart intake component. Drop a form into any site; incoming messages are classified, tagged and prioritized on submit.",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/prayer-request-widget.cjs",
-  "module": "./dist/prayer-request-widget.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/smart-intake-widget.cjs",
+  "module": "./dist/smart-intake-widget.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/prayer-request-widget.js",
-      "require": "./dist/prayer-request-widget.cjs"
+      "import": "./dist/smart-intake-widget.js",
+      "require": "./dist/smart-intake-widget.cjs"
     },
-    "./styles.css": "./dist/prayer-request-widget.css"
+    "./styles.css": "./dist/smart-intake-widget.css"
   },
   "files": [
     "dist",
@@ -58,10 +56,12 @@
     "react",
     "widget",
     "embeddable",
-    "openai",
-    "prayer",
+    "intake",
     "classification",
-    "portfolio"
+    "triage",
+    "support-form",
+    "contact-form",
+    "shadow-dom"
   ],
   "browserslist": {
     "production": [

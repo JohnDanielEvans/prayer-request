@@ -1,46 +1,54 @@
-import { FALLBACK_CATEGORY_ID } from '../categories.js';
-import { scoreCategories } from '../normalize.js';
+import { fallbackCategory } from '../categories.js';
+import { detectUrgency, extractTags, scoreCategories } from '../normalize.js';
+import { maxPriority } from '../classification.js';
+import { toClassification } from './shared.js';
 
 /**
- * Offline provider. No network, no key, no cost.
+ * The offline classifier. No network, no key, no cost.
  *
  * This is what makes the widget demoable: a portfolio visitor, a CI run, and a
- * host site evaluating the component all get working behavior on first load.
- * It scores the request against category keywords, which is crude next to a
- * model but lands the obvious cases and is fully deterministic.
+ * team evaluating the component all get working behavior on first load. It is
+ * keyword scoring, not language understanding -- crude next to a model, but
+ * deterministic, instant, and honest about what it is.
+ *
+ * Its confidence is a real function of match strength (see below), not a number
+ * invented to look convincing.
  */
-export function createMockProvider({ latency = [500, 1100] } = {}) {
-  return async function categorize({ text, categories, signal }) {
+export function createMockProvider({ latency = [450, 950] } = {}) {
+  return async function classify({ text, categories, signal }) {
     await simulateLatency(latency, signal);
 
     const scored = scoreCategories(text, categories);
     const best = scored[0];
     const runnerUp = scored[1];
+    const matched = best?.score > 0 ? best.category : fallbackCategory(categories);
 
-    if (!best || best.score === 0) {
-      return {
-        categoryId: FALLBACK_CATEGORY_ID,
-        confidence: 0.3,
+    return toClassification({
+      raw: {
+        category: matched.id,
+        // The category floor still applies, so a bug report stays high even
+        // when the wording is calm.
+        priority: maxPriority(detectUrgency(text), matched.defaultPriority),
+        tags: extractTags(text, matched),
+        confidence: scoreToConfidence(best?.score ?? 0, runnerUp?.score ?? 0),
         summary: summarize(text),
-        provider: 'mock',
-      };
-    }
-
-    // Confidence rises with the raw score and with the gap to second place --
-    // an unambiguous match should read differently from a coin flip.
-    const margin = best.score - (runnerUp?.score ?? 0);
-    const confidence = Math.min(
-      0.95,
-      0.5 + best.score * 0.06 + margin * 0.08
-    );
-
-    return {
-      categoryId: best.category.id,
-      confidence: Number(confidence.toFixed(2)),
-      summary: summarize(text),
-      provider: 'mock',
-    };
+      },
+      text,
+      categories,
+      provider: 'offline',
+    });
   };
+}
+
+/**
+ * Confidence rises with the raw score and with the gap to second place: an
+ * unambiguous match should read differently from a coin flip. Capped below 1
+ * because keyword scoring is never certain.
+ */
+function scoreToConfidence(best, runnerUp) {
+  if (best <= 0) return 0.25;
+  const margin = best - runnerUp;
+  return Number(Math.min(0.95, 0.45 + best * 0.05 + margin * 0.07).toFixed(2));
 }
 
 /** First sentence, trimmed -- stands in for the model's one-line summary. */

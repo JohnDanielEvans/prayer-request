@@ -43,7 +43,7 @@ function inlineCssAsGlobal() {
       );
       if (!entry) return;
 
-      entry.code = `globalThis.__PRAYER_WIDGET_CSS__=${JSON.stringify(css)};\n${entry.code}`;
+      entry.code = `globalThis.__SMART_INTAKE_CSS__=${JSON.stringify(css)};\n${entry.code}`;
     },
   };
 }
@@ -53,7 +53,7 @@ const shared = {
   css: {
     modules: {
       // Readable in devtools, still collision-proof on a host page.
-      generateScopedName: 'prw-[local]-[hash:base64:5]',
+      generateScopedName: 'si-[local]-[hash:base64:5]',
     },
   },
   test: {
@@ -72,12 +72,12 @@ export default defineConfig(() => {
         sourcemap: true,
         lib: {
           entry: 'src/index.js',
-          name: 'PrayerRequestWidget',
+          name: 'SmartIntakeWidget',
           formats: ['es', 'cjs'],
           fileName: (format) =>
             format === 'es'
-              ? 'prayer-request-widget.js'
-              : 'prayer-request-widget.cjs',
+              ? 'smart-intake-widget.js'
+              : 'smart-intake-widget.cjs',
         },
         rollupOptions: {
           external: ['react', 'react-dom', 'react/jsx-runtime'],
@@ -85,7 +85,7 @@ export default defineConfig(() => {
             // Without this, CJS consumers would need `.default` to reach the
             // component even when importing it by name.
             exports: 'named',
-            assetFileNames: 'prayer-request-widget.[ext]',
+            assetFileNames: 'smart-intake-widget.[ext]',
             globals: {
               react: 'React',
               'react-dom': 'ReactDOM',
@@ -111,9 +111,9 @@ export default defineConfig(() => {
         cssCodeSplit: false,
         lib: {
           entry: 'src/embed.jsx',
-          name: 'PrayerWidget',
+          name: 'SmartIntake',
           formats: ['iife'],
-          fileName: () => 'prayer-widget.js',
+          fileName: () => 'smart-intake.js',
         },
       },
     };

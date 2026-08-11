@@ -242,9 +242,15 @@ code {
   margin-inline: auto;
 }
 
+/*
+ * Every section heading is centered. The `margin-inline: auto` matters as much
+ * as the text-align: without it the 62ch box sits at the section's left edge and
+ * the text centers inside a box that is itself off-axis.
+ */
 .section-head {
   max-width: 62ch;
-  margin-bottom: 2.5rem;
+  margin: 0 auto 2.5rem;
+  text-align: center;
 }
 
 .section-head h2 {
@@ -255,22 +261,6 @@ code {
   margin: 0.8rem 0 0;
   color: var(--muted);
   font-size: 1.02rem;
-}
-
-/*
- * Opt-in centering for a section that reads as one block rather than a
- * left-aligned column. `.section-alt > *` already applies `margin-inline: auto`,
- * which centers the narrow .section-head box on its own -- but the text inside
- * stays left-aligned, so the heading floats off-axis from the full-width
- * content under it. Centering the text is what actually makes the group line up.
- */
-.section-centered .section-head {
-  text-align: center;
-}
-
-/* Same specificity clash as .category-grid -- .code sets `margin: 0`. */
-.section-centered .code {
-  margin-inline: auto;
 }
 
 /* ---------- playground ---------- */
@@ -536,7 +526,10 @@ code {
 /* ---------- code ---------- */
 
 .code {
-  margin: 0;
+  /* `auto`, not 0: `.section-alt > *` applies margin-inline: auto at the same
+     specificity as this rule, so a plain `margin: 0` here would win on source
+     order and pull code blocks off the section's centre line. */
+  margin: 0 auto;
   overflow: hidden;
   border: 1px solid #22262f;
   border-radius: var(--radius);
@@ -819,10 +812,10 @@ code {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.4rem 1.2rem;
+  gap: 0.4rem 1.5rem;
   margin: 1.1rem 0 0;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
 .arch-key {
@@ -840,25 +833,6 @@ code {
 
 .arch-key-server {
   background: var(--good);
-}
-
-.arch-methods {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 1.6rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.arch-methods li {
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--paper-2);
-  font-size: 0.82rem;
-  font-weight: 600;
 }
 
 /* ---------- result section ---------- */
@@ -1055,4 +1029,87 @@ code {
   font-size: 0.7rem;
   font-weight: 600;
   cursor: default;
+}
+
+/* ---------- how it works ---------- */
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.step {
+  flex: 1 1 16rem;
+  max-width: 22rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-align: left;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-bottom: 0.9rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.step h3 {
+  font-size: 1.05rem;
+}
+
+.step p {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* The worked example: input in quotes, output as a label row. */
+.step-example {
+  margin-top: 1rem !important;
+  padding: 0.65rem 0.8rem;
+  border-left: 3px solid var(--line);
+  border-radius: 0 8px 8px 0;
+  background: var(--paper-2);
+  color: var(--text) !important;
+  font-size: 0.88rem !important;
+}
+
+.step-example-out {
+  border-left-color: var(--brand);
+  color: var(--brand) !important;
+  font-weight: 600;
+}
+
+.step-example-code {
+  border-left-color: var(--good);
+  color: var(--good) !important;
+  font-family: var(--mono);
+  font-size: 0.82rem !important;
+}
+
+.section-footnote {
+  max-width: 46ch;
+  margin: 2rem auto 0;
+  color: var(--faint);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.split-spaced {
+  margin-top: 2.5rem;
 }

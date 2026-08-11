@@ -1,13 +1,13 @@
 /**
- * The whole architecture in one glance: where the request goes, and — the point
- * of the diagram — which side of the line the API key lives on.
+ * The whole path a message takes, in one glance. The colour split is the point:
+ * it shows which side of the line the API key lives on.
  */
 const STEPS = [
-  { label: 'Host site', note: 'Any page, any stack', side: 'client' },
-  { label: 'Intake widget', note: 'Shadow DOM, scoped CSS', side: 'client' },
-  { label: 'Your server', note: 'Holds the API key', side: 'server' },
-  { label: 'Classifier', note: 'Model provider', side: 'server' },
-  { label: 'Structured result', note: 'Validated, then rendered', side: 'server' },
+  { label: 'Your website', note: 'Where the form sits', side: 'client' },
+  { label: 'The widget', note: 'Takes the message', side: 'client' },
+  { label: 'Your server', note: 'Keeps your key safe', side: 'server' },
+  { label: 'The classifier', note: 'Reads and labels it', side: 'server' },
+  { label: 'Back to the page', note: 'Checked, then shown', side: 'server' },
 ];
 
 export function Architecture() {
@@ -24,15 +24,15 @@ export function Architecture() {
       </ol>
 
       <p className="arch-caption">
-        <span className="arch-key arch-key-client" /> Browser — no secrets
-        <span className="arch-key arch-key-server" /> Yours — secrets live here
+        <span>
+          <span className="arch-key arch-key-client" /> In the browser — no
+          secrets here
+        </span>
+        <span>
+          <span className="arch-key arch-key-server" /> Yours — the key lives
+          here
+        </span>
       </p>
-
-      <ul className="arch-methods">
-        <li>React component</li>
-        <li>Script embed</li>
-        <li>Headless hook</li>
-      </ul>
     </div>
   );
 }

@@ -44,25 +44,65 @@ export function App() {
       </header>
 
       <main>
-        <section className="section section-centered" id="architecture">
+        <section className="section" id="how">
           <div className="section-head">
-            <h2>How it fits together</h2>
+            <h2>How it works</h2>
             <p>
-              The widget never talks to a model directly. It posts to a server
-              you own, which holds the key and returns a validated result.
+              A contact form usually gives you a pile of untitled messages. This
+              one labels each message as it arrives.
             </p>
           </div>
-          <Architecture />
+
+          <ol className="steps">
+            <li className="step">
+              <span className="step-num">1</span>
+              <h3>Someone writes a message</h3>
+              <p>
+                An ordinary form. One text box — no dropdowns to pick from, no
+                “choose a department” guessing.
+              </p>
+              <p className="step-example">
+                “My invoice is showing the wrong amount.”
+              </p>
+            </li>
+
+            <li className="step">
+              <span className="step-num">2</span>
+              <h3>It gets labelled automatically</h3>
+              <p>
+                The moment they hit submit, the message is sorted into one of
+                your categories and given a priority and a few tags.
+              </p>
+              <p className="step-example step-example-out">
+                Billing · High priority · invoice, payment
+              </p>
+            </li>
+
+            <li className="step">
+              <span className="step-num">3</span>
+              <h3>Your app gets something it can use</h3>
+              <p>
+                You receive a small, predictable object — route it to a team,
+                save it, or start a workflow. What you do next is up to you.
+              </p>
+              <p className="step-example step-example-code">
+                onClassified(result)
+              </p>
+            </li>
+          </ol>
+
+          <p className="section-footnote">
+            Try it below. The demo does all of this in your browser — no
+            account, no API key, nothing sent anywhere.
+          </p>
         </section>
 
         <section className="section section-alt" id="demo">
           <div className="section-head">
-            <h2>Live demo</h2>
+            <h2>Try it</h2>
             <p>
-              Switch preset and the same component re-renders with different
-              categories, copy and colors — no per-use-case code anywhere. This
-              instance runs the offline classifier: no API key, no network, no
-              cost.
+              Pick a preset, then send it a message. Same component every time —
+              only the configuration changes.
             </p>
           </div>
           <Playground />
@@ -70,10 +110,10 @@ export function App() {
 
         <section className="section" id="result">
           <div className="section-head">
-            <h2>What comes back</h2>
+            <h2>What you get back</h2>
             <p>
-              Not just a category. Every submission resolves to a structured,
-              validated result your application can act on.
+              One small object per message. Always the same shape, always
+              filled in — so your code never has to guess.
             </p>
           </div>
 
@@ -98,44 +138,44 @@ export function App() {
             </div>
 
             <div className="split-col">
-              <h3>Every field is validated</h3>
+              <h3>Nothing unexpected gets through</h3>
+              <p className="split-text">
+                Whatever does the classifying, the answer is checked before your
+                app or the screen ever sees it.
+              </p>
               <ul className="check-list">
                 <li>
-                  <strong>category</strong> is matched against your configured
-                  list. A classifier cannot invent one — unknown answers fall to
-                  your catch-all bucket.
+                  <strong>category</strong> is always one of yours. It can't
+                  invent a new one — anything it isn't sure about lands in your
+                  catch-all.
                 </li>
                 <li>
-                  <strong>priority</strong> is coerced to{' '}
+                  <strong>priority</strong> is always one of{' '}
                   {PRIORITIES.map((p) => (
                     <code key={p}>{p}</code>
                   ))}
-                  . Synonyms like “critical” and “P1” map in; anything
-                  unrecognized is discarded rather than trusted.
+                  . Anything else is thrown away, not passed along.
                 </li>
                 <li>
-                  <strong>tags</strong> are lowercased, hyphenated, deduped and
-                  capped at four. Free-form, but never unbounded.
+                  <strong>tags</strong> are tidied to lowercase and capped at
+                  four, so a long list can't flood your UI.
                 </li>
                 <li>
-                  <strong>confidence</strong> is the classifier's own estimate.
-                  It is <em>not</em> a calibrated probability, and the UI labels
-                  it as such rather than implying more than it means.
+                  <strong>confidence</strong> is a rough self-estimate, not a
+                  guarantee — and the widget says so rather than dressing it up.
                 </li>
               </ul>
-              <p className="split-text">
-                One validation funnel handles all of it, so no provider — model,
-                your endpoint, or the offline heuristic — can leak an
-                unvalidated field into the UI.
-              </p>
             </div>
           </div>
         </section>
 
-        <section className="section section-alt section-centered" id="integrate">
+        <section className="section section-alt" id="integrate">
           <div className="section-head">
-            <h2>Three ways in</h2>
-            <p>The same component, packaged for whatever the host site actually is.</p>
+            <h2>Three ways to add it</h2>
+            <p>
+              Pick whichever matches the site you're putting it on. It's the
+              same component underneath.
+            </p>
           </div>
 
           <div className="cards">
@@ -154,10 +194,9 @@ export function App() {
               <span className="card-num">02</span>
               <h3>One script tag</h3>
               <p>
-                For WordPress, Squarespace, or a hand-written HTML page. React is
-                bundled in and the widget renders inside a{' '}
-                <strong>shadow root</strong>, so the host's stylesheet can't
-                reach in and break it.
+                For WordPress, Squarespace, or a plain HTML page — no build step.
+                The widget renders in its own sealed bubble, so the site's
+                existing CSS can't reach in and break it.
               </p>
               <code className="inline-code">&lt;div data-intake-widget&gt;</code>
             </article>
@@ -177,21 +216,23 @@ export function App() {
 
         <section className="section" id="security">
           <div className="section-head">
-            <h2>Where the API key lives</h2>
+            <h2>Where the message actually goes</h2>
             <p>
-              The single most important decision in this project, and the one
-              most browser-side AI demos get wrong.
+              The widget never talks to an AI provider itself. It sends the
+              message to a server you control, and that server keeps your API
+              key out of the browser.
             </p>
           </div>
 
-          <div className="split">
+          <Architecture />
+
+          <div className="split split-spaced">
             <div className="split-col">
-              <h3 className="bad-title">Key in the front end</h3>
+              <h3 className="bad-title">Key in the browser</h3>
               <p className="split-text">
-                Anything prefixed <code>VITE_</code> or <code>REACT_APP_</code>{' '}
-                is compiled into the JavaScript you serve. It's visible in
-                devtools, in the network tab, and in your source maps. Anyone can
-                lift it and bill their usage to you.
+                Any key you put in front-end code is baked into the JavaScript
+                you publish. Anyone can open devtools, copy it, and run up your
+                bill. Fine on your laptop; never on a live site.
               </p>
               <CodeBlock
                 label="dev only"
@@ -204,13 +245,12 @@ export function App() {
             </div>
 
             <div className="split-col">
-              <h3 className="good-title">Key on a server you own</h3>
+              <h3 className="good-title">Key on your server</h3>
               <p className="split-text">
-                The widget posts text to your endpoint; your endpoint holds the
-                key, validates the model's answer against your category list, and
-                returns a clean result. <code>server/</code> has a
-                zero-dependency Node proxy and a serverless function, both ready
-                to run.
+                The widget posts the message to your own URL. Your server holds
+                the key, checks the answer, and sends back a clean result.{' '}
+                <code>server/</code> has two ready-to-run versions — a small Node
+                script and a serverless function.
               </p>
               <CodeBlock
                 label="production"
@@ -223,13 +263,13 @@ export function App() {
           </div>
         </section>
 
-        <section className="section section-alt section-centered" id="presets">
+        <section className="section section-alt" id="presets">
           <div className="section-head">
-            <h2>Presets are configuration, not code</h2>
+            <h2>One component, very different jobs</h2>
             <p>
-              Each of these is the same component with a different props object.
-              Categories carry their own color, keywords, tag rules and default
-              priority.
+              These four aren't separate builds — they're the same widget with a
+              different list of categories. Define your own and it fits whatever
+              you're collecting.
             </p>
           </div>
 
@@ -332,7 +372,7 @@ export function App() {
           </div>
         </section>
 
-        <section className="section section-alt section-centered">
+        <section className="section section-alt">
           <div className="section-head">
             <h2>Run it</h2>
           </div>

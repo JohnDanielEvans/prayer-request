@@ -199,6 +199,11 @@ export function App() {
                 existing CSS can't reach in and break it.
               </p>
               <code className="inline-code">&lt;div data-intake-widget&gt;</code>
+              <p className="card-link">
+                <a href="/embed.html">
+                  See it survive a hostile page →
+                </a>
+              </p>
             </article>
 
             <article className="card">

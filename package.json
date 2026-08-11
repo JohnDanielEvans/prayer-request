@@ -25,13 +25,15 @@
     "start": "vite",
     "dev": "vite",
     "preview": "vite preview",
-    "build": "npm run build:demo && npm run build:lib && npm run build:embed",
+    "build": "npm run build:demo && npm run build:lib && npm run build:embed && npm run stage:embed",
     "build:demo": "BUILD_TARGET=demo vite build",
     "build:lib": "BUILD_TARGET=lib vite build",
     "build:embed": "BUILD_TARGET=embed vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "proxy": "node server/node-proxy.mjs"
+    "proxy": "node server/node-proxy.mjs",
+    "build:site": "npm run build:demo && npm run build:embed && npm run stage:embed",
+    "stage:embed": "node scripts/stage-embed.mjs"
   },
   "peerDependencies": {
     "react": ">=17",

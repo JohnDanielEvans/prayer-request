@@ -1113,3 +1113,18 @@ code {
 .split-spaced {
   margin-top: 2.5rem;
 }
+
+/* Link out to the standalone embed test page. */
+.card-link {
+  margin: 0.9rem 0 0 !important;
+  font-size: 0.86rem !important;
+}
+
+.card-link a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.card-link a:hover {
+  text-decoration: underline;
+}

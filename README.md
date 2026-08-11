@@ -339,12 +339,14 @@ Every token is a custom property on the widget root:
 npm start          # demo site (Vite dev server)
 npm test           # 121 tests: schema, classifier, presets, category resolution
 npm run proxy      # the server-side classification endpoint
-npm run build      # all three targets
+npm run build      # all three targets, plus staging for deploy
+npm run build:site # what a static host runs: site + embed script
 ```
 
 | Target | Output | Contents |
 | --- | --- | --- |
-| `build:demo` | `dist-demo/` | The case-study site. |
+| `build:site` | `dist-demo/` | **What the host deploys** — the case-study site plus the embed script and `/embed.html`. |
+| `build:demo` | `dist-demo/` | The case-study site alone. |
 | `build:lib` | `dist/` | ES + CJS package, React external. ~18 kB gzipped. |
 | `build:embed` | `dist-embed/` | Single-file IIFE, React bundled, CSS inlined. ~61 kB gzipped. |
 
@@ -371,6 +373,7 @@ src/
 └── demo/                    The case-study site
 server/                      Zero-dep Node proxy + serverless function
 examples/embed.html          Embed test against a hostile host page
+scripts/stage-embed.mjs      Copies the embed script into the deployed site
 ```
 
 ## Naming
